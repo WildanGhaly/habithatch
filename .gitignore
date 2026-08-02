@@ -38,3 +38,10 @@ release/
 .idea/
 .vscode/*
 !.vscode/extensions.json
+
+# test build output
+.test-build/
+
+# verification artifacts
+.playwright-mcp/
+expo-web.log
