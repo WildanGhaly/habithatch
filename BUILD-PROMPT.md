@@ -11,6 +11,22 @@ expo-sqlite integration + `/bug-hunter` + `/auto-pr`. Or paste the prompt below 
 
 ## THE PROMPT (copy everything below)
 
+AUTONOMY — UNATTENDED RUN (read this first, it governs everything below)
+Work fully autonomously from here to done. The user is AWAY for 10+ hours (running for a full day
+is completely fine) and CANNOT answer anything — so do NOT ask questions, do NOT wait for
+confirmation, and do NOT stop for approval at any point. Resolve every ambiguity yourself with
+pragmatic senior-engineer judgment and record it in a running decision log. You are pre-authorized
+to do whatever the build needs locally: install dependencies, scaffold the Expo app, run prebuild,
+builds, linters, type checks, tests, the Android emulator, Playwright/browser verification, start
+background dev servers, and deliver via the PRs described under DELIVERY. When something genuinely
+needs the user (a missing secret, a destructive action outside this scope, a hard external outage),
+PARK it — write down what is blocked, why, what you tried, and the exact next step — then keep going
+on everything else; never halt at the first obstacle. Spend the whole time budget on depth,
+verification, edge cases, and polish, not on stopping early. Keep a live todo list and COMMIT at
+every green milestone so hours of work can never be lost. Finish with ONE honest report: what
+shipped, what was parked (with exact next steps), and every decision you made. (If the `/full-auto`
+skill is available, run under it; the charter is this prompt.)
+
 Build **HabitHatch**, a gamified daily-habit-tracker Android app, as a production-grade
 Expo / React Native application, implemented **1:1 (pixel-perfect and behavior-for-behavior)
 from `prototype/habithatch_v1.html`**, which is the single source of truth for layout, visual
