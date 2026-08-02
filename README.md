@@ -6,24 +6,51 @@ consistency. A spin-off of [Pawductivity](https://github.com/WildanGhaly/pawduct
 reuses its virtual-pet engine, coin economy, care loop, and design system, retargeted from a
 focus timer to habit tracking.
 
-## Status: pre-build (spec + assets ready)
+## Status: built ✅
 
-This repo currently holds the **plan, the art, and the two build prompts**. The app itself is
-built in two phases:
+The full Expo / React Native app is built **1:1 from `prototype/habithatch_v1.html`** and
+delivered across PRs #1–#7. All ~16 screens, the offline SQLite gamified loop, the reanimated
+UI-thread companion, notifications, and 5 themes are implemented. A **signed release AAB (R8)**
+builds and the release APK runs standalone on the Android emulator. See
+[`REPORT.md`](./REPORT.md) for the full build report and [`DECISIONS.md`](./DECISIONS.md) for the
+decision log.
 
-1. **Prototype** — generate a single-file interactive HTML prototype on claude.ai using
-   [`PROTO-PROMPT.md`](./PROTO-PROMPT.md), then drop it in [`prototype/`](./prototype/) as
-   `habithatch_v1.html`. That file becomes the 1:1 source of truth for the app.
-2. **App** — build the Expo / React Native app **1:1 from the prototype** using
-   [`BUILD-PROMPT.md`](./BUILD-PROMPT.md), reusing the Pawductivity architecture.
+```bash
+npm run web         # Expo web (the pixel-parity target)
+npm test            # 18 domain unit tests (rollover / streaks / decay / hatch / coins)
+npm run typecheck   # tsc --noEmit
+npx expo run:android                          # dev build on device/emulator
+cd android && ./gradlew :app:bundleRelease    # signed release AAB (needs the local keystore)
+```
 
-## Structure
+## App structure
+
+```
+App.tsx / index.ts          Expo entry; fonts, hydrate, ThemeProvider, nav
+src/
+  domain/                   Pure, unit-tested game logic ported from the prototype S-model:
+                              dates, types, catalogs, mechanics, actions (rollover/check-off/
+                              hatch/coins/garden), state (blank + demo seed), domain.test.ts
+  store/store.ts            zustand + immer over a single-JSON expo-sqlite snapshot
+  theme/                    tokens + ThemeContext (5 accent themes via useC())
+  db/persistence.ts         kv-table snapshot persistence (native sqlite / web localStorage)
+  art/                      inlined SVG icon + art registries (rendered via SvgXml)
+  components/               ui, Icon, Art, TabBar, OverlayHost, BottomSheet, RoomStage, HabitRow,
+                              Ring, RewardOverlay, Toast, PetSprite (reanimated), PetView, DeviceFrame
+  screens/                  Splash, Onboarding, MainScreen (Today/Habits/Companion/Garden tabs),
+                              Editor/Goal/Feed/Buy sheets, Shop/Insights/Achievements/Profile/
+                              Premium/Referral/Recap/Appearance/Nursery overlays
+  notifications/            per-habit reminders + evening/streak/hatch/hunger nudges
+android/                    prebuilt native project (New Arch/Fabric, R8, release signing)
+build-notes/               per-screen prototype specs + Pawductivity fork guides (build contract)
+```
+
+## Concept & spec (source material)
 
 ```
 PLAN.md                     Full 13-section product spec (screens, data model, economy, roadmap)
-PROTO-PROMPT.md             Prompt to generate the web HTML prototype (phase 1)
-BUILD-PROMPT.md             Prompt to build the Expo/RN app 1:1 from the prototype (phase 2)
-prototype/                  Drop the generated habithatch_v1.html here (the SOT for the build)
+PROTO-PROMPT.md / BUILD-PROMPT.md   The prompts that generated the prototype and this app
+prototype/habithatch_v1.html        The 1:1 pixel + behavior source of truth
 assets/
   new/                      20 concept-specific SVGs (egg stages, habit icons, garden, streak flame)
   reused/                   Art + code seeds reused from Pawductivity:
