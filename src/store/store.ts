@@ -190,6 +190,10 @@ export const useStore = create<StoreShape>((set, get) => {
       if (rolled.frozeYesterday) {
         get().showToast('A Streak Freeze saved your streak. Keep it going today!');
       }
+      // Hunger nudge when the companion drops below 40 health at rollover.
+      if (rolled.pet.hatchState === 'hatched' && rolled.pet.health < 40 && rolled.settings.hunger) {
+        Notif.notifyHunger(rolled.pet.name);
+      }
       // Egg reached the hatch gate while away: reveal the Nursery on open.
       if (rolled.pet.hatchState !== 'hatched' && rolled.pet.hatchProgress >= 3) {
         setTimeout(() => get().openOverlay('nursery'), 500);
