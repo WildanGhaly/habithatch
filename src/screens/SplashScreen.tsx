@@ -1,0 +1,85 @@
+import React, { useEffect, useRef } from 'react';
+import { View, StyleSheet, Animated, Easing, Pressable } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Txt } from '../components/ui';
+import { Art } from '../components/Art';
+import { useStore } from '../store/store';
+
+const SPLASH_LINES = [
+  'Small habits, big changes.',
+  'Keep the streak, hatch a friend.',
+  'One check-off at a time.',
+  'Consistency is just showing up again.',
+  'Progress hides inside ordinary days.',
+  'The hardest part is the first three days.',
+  'Tiny habits stack into a life.',
+  'Show up today; your companion is waiting.',
+  'Miss a day, not a habit.',
+  'Every check-off feeds something living.',
+];
+
+export function SplashScreen({ onDone }: { onDone: () => void }) {
+  const quote = useRef(SPLASH_LINES[Math.floor(Math.random() * SPLASH_LINES.length)]).current;
+  const pop = useRef(new Animated.Value(0)).current;
+  const pulse = useRef(new Animated.Value(0)).current;
+  const load = useRef(new Animated.Value(0)).current;
+  const quoteAnim = useRef(new Animated.Value(0)).current;
+  const seedDemo = useStore((s) => s.seedDemo);
+  const taps = useRef(0);
+
+  useEffect(() => {
+    Animated.spring(pop, { toValue: 1, friction: 5, tension: 90, useNativeDriver: true }).start();
+    Animated.timing(quoteAnim, { toValue: 1, duration: 800, delay: 300, easing: Easing.out(Easing.ease), useNativeDriver: true }).start();
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulse, { toValue: 1, duration: 1500, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
+        Animated.timing(pulse, { toValue: 0, duration: 1500, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
+      ]),
+    ).start();
+    Animated.loop(Animated.timing(load, { toValue: 1, duration: 1200, easing: Easing.inOut(Easing.ease), useNativeDriver: true })).start();
+    const t = setTimeout(onDone, 2600);
+    return () => clearTimeout(t);
+  }, []);
+
+  const trackW = 120;
+  const barTranslate = load.interpolate({ inputRange: [0, 1], outputRange: [-trackW * 0.4, trackW] });
+  const glowScale = pulse.interpolate({ inputRange: [0, 1], outputRange: [0.94, 1.06] });
+  const glowOpacity = pulse.interpolate({ inputRange: [0, 1], outputRange: [0.4, 0.62] });
+
+  // Dev tap (bottom-right, invisible) loads the mid-journey demo seed, like the prototype.
+  const onDev = () => {
+    taps.current += 1;
+    if (taps.current >= 3) seedDemo();
+  };
+
+  return (
+    <LinearGradient colors={['#0C4C60', '#0a3d4e']} style={styles.root}>
+      <Animated.View style={[styles.glow, { opacity: glowOpacity, transform: [{ scale: glowScale }] }]} />
+      <Animated.View style={{ transform: [{ scale: pop }], opacity: pop, zIndex: 2 }}>
+        <Art name="eggWhole" height={126} />
+      </Animated.View>
+      <Txt weight={800} size={30} color="#fff" style={{ marginTop: 18, letterSpacing: 0.5, zIndex: 2 }}>HabitHatch</Txt>
+      <Txt weight={600} size={13.5} color="#BFE3F3" style={{ marginTop: 2, zIndex: 2 }}>Keep your habits. Hatch a friend.</Txt>
+      <Animated.View style={{ position: 'absolute', bottom: 104, left: 30, right: 30, zIndex: 2, opacity: quoteAnim, transform: [{ translateY: quoteAnim.interpolate({ inputRange: [0, 1], outputRange: [7, 0] }) }] }}>
+        <Txt weight={600} size={13.5} color="#8FC0CC" style={{ textAlign: 'center', lineHeight: 21 }}>{quote}</Txt>
+      </Animated.View>
+      <View style={styles.loader}>
+        <Animated.View style={[styles.loaderBar, { transform: [{ translateX: barTranslate }] }]} />
+      </View>
+      <Pressable onPress={onDev} style={styles.dev} accessibilityLabel="dev" />
+    </LinearGradient>
+  );
+}
+
+const styles = StyleSheet.create({
+  root: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  glow: {
+    position: 'absolute', width: 340, height: 340, borderRadius: 170,
+    backgroundColor: 'rgba(255,218,124,0.22)',
+  },
+  loader: { position: 'absolute', bottom: 70, width: 120, height: 5, borderRadius: 9, backgroundColor: 'rgba(255,255,255,.18)', overflow: 'hidden' },
+  loaderBar: { position: 'absolute', width: '40%', height: '100%', backgroundColor: '#E28A4B', borderRadius: 9 },
+  dev: { position: 'absolute', right: 0, bottom: 0, width: 48, height: 48 },
+});
+
+export { SPLASH_LINES };
