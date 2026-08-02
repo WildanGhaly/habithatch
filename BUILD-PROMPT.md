@@ -1,8 +1,10 @@
 # Claude Code build prompt — HabitHatch app (1:1 from the prototype)
 
 Use this in the `habithatch` repo (Claude Code). It builds the real Android app 1:1 from the
-HTML prototype, exactly as Pawductivity was built from its own prototype. **Prerequisite:**
-`prototype/habithatch_v1.html` exists (generate it first with `PROTO-PROMPT.md`).
+HTML prototype, exactly as Pawductivity was built from its own prototype. **Self-sufficient:**
+if `prototype/habithatch_v1.html` exists (e.g. generated via `PROTO-PROMPT.md`) it is used as the
+pixel source of truth; if it does not exist, the prompt generates one first, so this can be pasted
+and left to run overnight with nothing else prepared.
 
 Suggested kickoff: `/orchestrate` wrapping `/full-auto` around `/fe-build` (mobile-adapted) +
 expo-sqlite integration + `/bug-hunter` + `/auto-pr`. Or paste the prompt below directly.
@@ -27,11 +29,19 @@ every green milestone so hours of work can never be lost. Finish with ONE honest
 shipped, what was parked (with exact next steps), and every decision you made. (If the `/full-auto`
 skill is available, run under it; the charter is this prompt.)
 
+STEP 0 — ENSURE A PROTOTYPE EXISTS (do this before anything else)
+If `prototype/habithatch_v1.html` already exists, it is the pixel + behavior source of truth —
+match it exactly. If it does NOT exist, first AUTHOR it yourself: a single self-contained,
+interactive HTML prototype of HabitHatch (phone-frame, vanilla JS, all screens clickable) built
+from `PLAN.md` + the art in `assets/` + the Pawductivity design system (`assets/reused/tokens.ts`),
+at the fidelity of Pawductivity's own `prototype/pawductivity_v1.html`. Save it to
+`prototype/habithatch_v1.html` and commit it. Either way, the app is then built 1:1 from that file.
+
 Build **HabitHatch**, a gamified daily-habit-tracker Android app, as a production-grade
 Expo / React Native application, implemented **1:1 (pixel-perfect and behavior-for-behavior)
-from `prototype/habithatch_v1.html`**, which is the single source of truth for layout, visual
-design, screens, copy, and interactions. This mirrors exactly how Pawductivity was built from
-its own `prototype/pawductivity_v1.html`.
+from `prototype/habithatch_v1.html`** (the file guaranteed to exist by Step 0), which is the single
+source of truth for layout, visual design, screens, copy, and interactions. This mirrors exactly how
+Pawductivity was built from its own `prototype/pawductivity_v1.html`.
 
 ### Inputs (all in this repo)
 - **`prototype/habithatch_v1.html`** — the pixel + behavior SOT. Match it exactly. When it and
