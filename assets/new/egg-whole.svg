@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 118" width="200" height="236">
+ <ellipse cx="50" cy="108" rx="26" ry="6" fill="rgba(0,0,0,0.12)"/>
+ <!-- nest -->
+ <path d="M18 98 Q50 116 82 98 Q80 110 50 112 Q20 110 18 98 Z" fill="#C9773A"/>
+ <path d="M22 99 Q36 108 50 108 Q64 108 78 99" fill="none" stroke="#E28A4B" stroke-width="3" stroke-linecap="round"/>
+ <path d="M26 103 Q40 110 54 108" fill="none" stroke="#A0723A" stroke-width="2.4" stroke-linecap="round"/>
+ <!-- egg -->
+ <path d="M50 16 C69 16 79 44 79 68 C79 92 66 104 50 104 C34 104 21 92 21 68 C21 44 31 16 50 16 Z" fill="#FFDA7C"/>
+ <path d="M50 16 C50 16 39 16 31 40 Q40 30 50 30 Z" fill="#FFE7A6" opacity="0.7"/>
+ <!-- spots -->
+ <ellipse cx="38" cy="54" rx="6" ry="7" fill="#E28A4B" opacity="0.85"/>
+ <ellipse cx="60" cy="44" rx="4.5" ry="5.5" fill="#12667F" opacity="0.7"/>
+ <ellipse cx="62" cy="72" rx="6.5" ry="5" fill="#E28A4B" opacity="0.8"/>
+ <ellipse cx="42" cy="82" rx="4" ry="5" fill="#12667F" opacity="0.65"/>
+ <circle cx="50" cy="66" r="3" fill="#F4B942"/>
+</svg>

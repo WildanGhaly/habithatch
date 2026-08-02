@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+ <!-- rays -->
+ <g stroke="#F4B942" stroke-width="4.5" stroke-linecap="round">
+  <line x1="50" y1="14" x2="50" y2="26"/>
+  <line x1="26" y1="24" x2="33" y2="34"/>
+  <line x1="74" y1="24" x2="67" y2="34"/>
+  <line x1="14" y1="46" x2="26" y2="46"/>
+  <line x1="74" y1="46" x2="86" y2="46"/>
+ </g>
+ <!-- sun (half) -->
+ <path d="M28 60 A22 22 0 0 1 72 60 Z" fill="#FFDA7C"/>
+ <path d="M28 60 A22 22 0 0 1 72 60" fill="none" stroke="#E28A4B" stroke-width="4"/>
+ <!-- horizon -->
+ <line x1="12" y1="72" x2="88" y2="72" stroke="#0C4C60" stroke-width="5" stroke-linecap="round"/>
+ <line x1="30" y1="82" x2="70" y2="82" stroke="#12667F" stroke-width="4.5" stroke-linecap="round"/>
+</svg>

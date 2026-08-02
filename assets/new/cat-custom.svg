@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+ <!-- rounded tag/card -->
+ <rect x="22" y="22" width="56" height="56" rx="16" fill="#FBF6EC" stroke="#0C4C60" stroke-width="4"/>
+ <!-- four-point sparkle (your-own accent) -->
+ <path d="M50 32 Q53 47 68 50 Q53 53 50 68 Q47 53 32 50 Q47 47 50 32 Z" fill="#E28A4B"/>
+ <!-- small corner spark -->
+ <circle cx="66" cy="34" r="3.2" fill="#F4B942"/>
+ <circle cx="34" cy="66" r="2.6" fill="#12667F"/>
+</svg>

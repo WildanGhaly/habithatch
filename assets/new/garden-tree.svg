@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 118" width="200" height="236">
+ <ellipse cx="50" cy="106" rx="30" ry="6" fill="rgba(0,0,0,0.12)"/>
+ <!-- soil mound -->
+ <path d="M18 102 Q50 86 82 102 Q82 110 50 112 Q18 110 18 102 Z" fill="#C9773A"/>
+ <!-- trunk -->
+ <path d="M44 104 Q44 78 46 64 L54 64 Q56 78 56 104 Z" fill="#A0723A"/>
+ <path d="M50 96 L50 74 M50 84 L58 78 M50 80 L42 74" fill="none" stroke="#8A5F30" stroke-width="2.4" stroke-linecap="round"/>
+ <!-- canopy -->
+ <circle cx="50" cy="44" r="26" fill="#A7C34F"/>
+ <circle cx="30" cy="54" r="16" fill="#B7D25E"/>
+ <circle cx="70" cy="54" r="16" fill="#B7D25E"/>
+ <circle cx="50" cy="34" r="17" fill="#B7D25E"/>
+ <!-- fruit dots -->
+ <circle cx="40" cy="48" r="3.4" fill="#E5654B"/>
+ <circle cx="60" cy="42" r="3.4" fill="#E5654B"/>
+ <circle cx="52" cy="58" r="3.4" fill="#E5654B"/>
+</svg>

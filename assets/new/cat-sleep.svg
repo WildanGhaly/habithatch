@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+ <!-- crescent moon -->
+ <path d="M62 20 A34 34 0 1 0 80 66 A26 26 0 1 1 62 20 Z" fill="#12667F"/>
+ <!-- small star -->
+ <path d="M74 30 l2 -5 l2 5 l5 2 l-5 2 l-2 5 l-2 -5 l-5 -2 Z" fill="#FFDA7C"/>
+ <!-- Zzz -->
+ <path d="M64 44 L74 44 L64 54 L74 54" fill="none" stroke="#F4B942" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
+ <path d="M78 54 L85 54 L78 61 L85 61" fill="none" stroke="#F4B942" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

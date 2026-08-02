@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+ <!-- rounded checkbox, checked state -->
+ <rect x="14" y="14" width="72" height="72" rx="22" fill="#1E7F91"/>
+ <rect x="14" y="14" width="72" height="72" rx="22" fill="none" stroke="#0C4C60" stroke-width="3" opacity="0.35"/>
+ <path d="M34 52 L46 64 L68 38" fill="none" stroke="#FBF6EC" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

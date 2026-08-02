@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 118" width="200" height="236">
+ <ellipse cx="50" cy="108" rx="36" ry="7" fill="rgba(0,0,0,0.12)"/>
+ <!-- grassy ground -->
+ <path d="M12 104 Q50 92 88 104 Q88 112 50 114 Q12 112 12 104 Z" fill="#A7C34F"/>
+ <path d="M22 103 Q50 94 78 103" fill="none" stroke="#7FA23C" stroke-width="2.4" stroke-linecap="round"/>
+ <!-- back tree (smaller) -->
+ <path d="M26 100 Q26 86 27 78 L33 78 Q34 86 34 100 Z" fill="#A0723A"/>
+ <circle cx="30" cy="66" r="15" fill="#B7D25E"/>
+ <circle cx="30" cy="60" r="11" fill="#A7C34F"/>
+ <!-- main tree -->
+ <path d="M52 104 Q52 74 54 58 L64 58 Q66 74 66 104 Z" fill="#A0723A"/>
+ <path d="M59 94 L59 66 M59 78 L68 72 M59 74 L50 68" fill="none" stroke="#8A5F30" stroke-width="2.4" stroke-linecap="round"/>
+ <circle cx="59" cy="40" r="26" fill="#A7C34F"/>
+ <circle cx="40" cy="50" r="15" fill="#B7D25E"/>
+ <circle cx="78" cy="50" r="15" fill="#B7D25E"/>
+ <circle cx="59" cy="30" r="16" fill="#B7D25E"/>
+ <!-- fruit -->
+ <circle cx="49" cy="44" r="3.4" fill="#E5654B"/>
+ <circle cx="69" cy="38" r="3.4" fill="#E5654B"/>
+ <circle cx="60" cy="54" r="3.4" fill="#E5654B"/>
+ <circle cx="70" cy="52" r="3" fill="#F4B942"/>
+ <!-- ground flowers -->
+ <circle cx="18" cy="106" r="3.2" fill="#E68FB0"/><circle cx="18" cy="106" r="1.2" fill="#FFDA7C"/>
+ <circle cx="82" cy="106" r="3.2" fill="#E68FB0"/><circle cx="82" cy="106" r="1.2" fill="#FFDA7C"/>
+ <circle cx="44" cy="108" r="2.6" fill="#FFDA7C"/>
+</svg>

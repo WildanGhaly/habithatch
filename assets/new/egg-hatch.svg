@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 118" width="200" height="236">
+ <ellipse cx="50" cy="108" rx="27" ry="6" fill="rgba(0,0,0,0.12)"/>
+ <path d="M18 98 Q50 116 82 98 Q80 110 50 112 Q20 110 18 98 Z" fill="#C9773A"/>
+ <path d="M22 99 Q36 108 50 108 Q64 108 78 99" fill="none" stroke="#E28A4B" stroke-width="3" stroke-linecap="round"/>
+ <!-- bottom shell (bowl) -->
+ <path d="M23 66 C23 90 36 104 50 104 C64 104 77 90 77 66 L72 66 L66 60 L58 66 L50 59 L42 66 L34 60 L28 66 Z" fill="#FFDA7C"/>
+ <ellipse cx="40" cy="82" rx="5" ry="6" fill="#E28A4B" opacity="0.8"/>
+ <ellipse cx="61" cy="80" rx="4" ry="5" fill="#12667F" opacity="0.6"/>
+ <!-- companion peeking (species-neutral) -->
+ <ellipse cx="50" cy="58" rx="18" ry="17" fill="#F7EDE3"/>
+ <path d="M36 50 Q33 38 40 40 Q42 46 44 50 Z" fill="#F7EDE3"/>
+ <path d="M64 50 Q67 38 60 40 Q58 46 56 50 Z" fill="#F7EDE3"/>
+ <ellipse cx="43" cy="57" rx="3" ry="3.6" fill="#2D2F41"/><circle cx="44" cy="55.8" r="1" fill="#fff"/>
+ <ellipse cx="57" cy="57" rx="3" ry="3.6" fill="#2D2F41"/><circle cx="58" cy="55.8" r="1" fill="#fff"/>
+ <path d="M47 63 Q50 66 53 63 Q50 68 47 63 Z" fill="#E28A4B"/>
+ <circle cx="37" cy="61" r="2.6" fill="rgba(230,143,176,0.5)"/><circle cx="63" cy="61" r="2.6" fill="rgba(230,143,176,0.5)"/>
+ <!-- flung top shell piece -->
+ <g transform="rotate(28 78 30)"><path d="M66 34 L72 26 L78 33 L84 25 L90 33 C90 33 88 22 78 22 C68 22 66 34 66 34 Z" fill="#FFDA7C"/><ellipse cx="80" cy="28" rx="3" ry="3.6" fill="#E28A4B" opacity="0.8"/></g>
+ <!-- celebration sparks -->
+ <path d="M16 40 l3 -6 l3 6 l6 3 l-6 3 l-3 6 l-3 -6 l-6 -3 Z" fill="#FFDA7C"/>
+ <path d="M22 68 l2 -4 l2 4 l4 2 l-4 2 l-2 4 l-2 -4 l-4 -2 Z" fill="#F4B942"/>
+ <circle cx="80" cy="58" r="2.4" fill="#E68FB0"/>
+</svg>

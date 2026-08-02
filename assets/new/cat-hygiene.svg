@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+ <!-- handle -->
+ <rect x="20" y="60" width="60" height="12" rx="6" transform="rotate(-30 50 66)" fill="#12667F"/>
+ <!-- brush head -->
+ <rect x="16" y="30" width="20" height="16" rx="5" transform="rotate(-30 26 38)" fill="#0C4C60"/>
+ <!-- bristles -->
+ <path d="M16 26 L18 20 M22 24 L24 18 M28 22 L30 16" stroke="#BFE3F3" stroke-width="3.4" stroke-linecap="round"/>
+ <!-- toothpaste blob -->
+ <path d="M22 20 Q18 10 26 12 Q34 14 30 22 Q26 26 22 20 Z" fill="#E68FB0"/>
+</svg>

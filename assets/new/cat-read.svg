@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+ <!-- open book -->
+ <path d="M50 28 Q34 20 18 26 L18 76 Q34 70 50 78 Z" fill="#12667F"/>
+ <path d="M50 28 Q66 20 82 26 L82 76 Q66 70 50 78 Z" fill="#0C4C60"/>
+ <!-- pages -->
+ <path d="M48 32 Q35 26 23 30 L23 72 Q35 67 48 73 Z" fill="#FBF6EC"/>
+ <path d="M52 32 Q65 26 77 30 L77 72 Q65 67 52 73 Z" fill="#FBF6EC"/>
+ <path d="M30 40 L42 44 M30 50 L42 54 M58 40 L70 44 M58 50 L70 54" stroke="#E4D8C2" stroke-width="2.6" stroke-linecap="round"/>
+</svg>

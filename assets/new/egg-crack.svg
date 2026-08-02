@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 118" width="200" height="236">
+ <ellipse cx="50" cy="108" rx="26" ry="6" fill="rgba(0,0,0,0.12)"/>
+ <path d="M18 98 Q50 116 82 98 Q80 110 50 112 Q20 110 18 98 Z" fill="#C9773A"/>
+ <path d="M22 99 Q36 108 50 108 Q64 108 78 99" fill="none" stroke="#E28A4B" stroke-width="3" stroke-linecap="round"/>
+ <!-- egg -->
+ <path d="M50 16 C69 16 79 44 79 68 C79 92 66 104 50 104 C34 104 21 92 21 68 C21 44 31 16 50 16 Z" fill="#FFDA7C"/>
+ <path d="M50 16 C50 16 39 16 31 40 Q40 30 50 30 Z" fill="#FFE7A6" opacity="0.7"/>
+ <ellipse cx="38" cy="54" rx="6" ry="7" fill="#E28A4B" opacity="0.85"/>
+ <ellipse cx="60" cy="44" rx="4.5" ry="5.5" fill="#12667F" opacity="0.7"/>
+ <ellipse cx="62" cy="76" rx="6" ry="4.5" fill="#E28A4B" opacity="0.8"/>
+ <!-- jagged crack -->
+ <path d="M22 62 L34 58 L40 66 L52 60 L60 68 L72 62 L78 66" fill="none" stroke="#B98A3A" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+ <path d="M52 60 L50 70 L54 78" fill="none" stroke="#B98A3A" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+ <!-- small chip gap -->
+ <path d="M40 66 L45 63 L48 68 Z" fill="#FBF6EC"/>
+ <!-- wobble sparks -->
+ <path d="M14 46 l3 -5 l3 5 l5 3 l-5 3 l-3 5 l-3 -5 l-5 -3 Z" fill="#FFDA7C"/>
+ <path d="M84 40 l2 -3 l2 3 l3 2 l-3 2 l-2 3 l-2 -3 l-3 -2 Z" fill="#F4B942"/>
+</svg>

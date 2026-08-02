@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+ <!-- shoe body -->
+ <path d="M16 46 Q22 44 30 46 L40 44 Q50 40 58 48 Q78 52 84 62 Q86 68 82 70 L20 70 Q14 70 14 62 Q14 52 16 46 Z" fill="#E28A4B"/>
+ <!-- sole -->
+ <path d="M14 68 L84 68 Q88 68 86 74 L18 74 Q13 74 14 68 Z" fill="#0C4C60"/>
+ <!-- swoosh -->
+ <path d="M30 60 Q48 48 74 60" fill="none" stroke="#FBF6EC" stroke-width="5" stroke-linecap="round"/>
+ <!-- laces -->
+ <path d="M40 50 L46 46 M46 54 L52 50 M52 58 L58 54" stroke="#0C4C60" stroke-width="3" stroke-linecap="round"/>
+ <!-- motion lines -->
+ <path d="M6 54 L14 54 M4 62 L12 62" stroke="#8FD0EC" stroke-width="3" stroke-linecap="round"/>
+</svg>
