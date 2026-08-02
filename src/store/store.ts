@@ -30,7 +30,7 @@ export type OverlayName =
   | 'editor' | 'goal' | 'feed' | 'buy' | 'appearance';
 export interface OverlayState { name: OverlayName; param?: any }
 
-const FULL: OverlayName[] = ['shop', 'insights', 'achievements', 'premium', 'referral', 'recap', 'profile', 'nursery'];
+const FULL: OverlayName[] = ['shop', 'insights', 'achievements', 'premium', 'referral', 'recap', 'profile', 'nursery', 'appearance'];
 export const isFullOverlay = (n: OverlayName) => FULL.includes(n);
 
 export interface HabitInput {
