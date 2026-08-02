@@ -8,3 +8,4 @@ export async function requestPermission(): Promise<boolean> {
 }
 export async function syncHabitReminders(_habits: Habit[], _settings: Settings): Promise<void> {}
 export async function notifyHatchReady(): Promise<void> {}
+export async function notifyHunger(_petName: string): Promise<void> {}

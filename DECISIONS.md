@@ -79,6 +79,30 @@ shipped, and what was parked. Newest entries at the bottom of each section.
   gained `spd` tiers (1.25/1/0.7/0.6) feeding the engine speed.
 
 ## Milestones shipped (cont.)
+- **M3 — Habits tab + Editor + Goal (PR2).** Full habit management: list w/ weekly dots + reorder,
+  the icon/schedule/reminder editor + 7-habit free cap, daily-goal sheet. Web-verified.
+- **M4 — Companion + Feed + reanimated pet engine (PR3).** Ported `PetSprite` byte-for-byte
+  (UI-thread matrix worklets); PetView = PetSprite/Lottie(native)/PNG(web). Two-variant Companion
+  tab + Feed sheet. Web-verified (fox animates).
+- **M5 — Nursery hatch (PR4).** Timed egg→crack→hatch→star-burst→name overlay. Web-verified reveal.
+- **M6 — Garden + Shop + Buy (PR5).** 8-plot Garden w/ scene, 3-tab Shop, buy-confirm. Web-verified.
+- **M7 — Insights + Achievements + Profile/Premium/Referral/Recap/Appearance (PR6).** 5-tab Insights
+  (incl. 8-week heatmap) + 12-badge Achievements built by me; the 5 presentational overlays drafted
+  by a **parallel subagent workflow** against the component API, then integrated (1 routing fix).
+  Web-verified: Insights heatmap/leaderboard, Achievements, Profile, Premium, Recap, Appearance
+  (theme switch recolors app-wide).
+- **M8 — Android build runs on emulator (DONE).** `expo prebuild` → `android/`; applied the gradle
+  gotcha (`-Xmx5120m`, `parallel=false`, `--max-workers=2`). **Debug** built (26m) + ran on the
+  `pawductivity_x64` emulator via Metro — **Fabric/New Architecture confirmed** (`Running "main"
+  … fabric:true`), native react-native-svg art + Poppins + touch/store all working (onboarding
+  category toggle + species picker w/ animated PetSprite species). **Signed release** APK (110MB,
+  R8-shrunk from 242MB) + **AAB (80MB)** built (38m) with a 41MB R8 `mapping.txt`; the release APK
+  runs **standalone (no Metro)** with zero R8-stripping crashes. Release keystore
+  (`android/app/habithatch-release.keystore`) is a **local secret** (gitignored per repo policy) —
+  regenerate to rebuild release elsewhere.
+- **D10 — Commit the `android/` native source.** Committed for reproducible builds (gradle tuning +
+  release signing wiring + manifest are versioned); build outputs (`android/**/build`) and the
+  keystore stay gitignored + local.
 - **M2 — Scaffold boots + Today screen 1:1.** Forked Pawductivity infra (config, nav shell,
   components, PetSprite→PetView, tokens, assets, node_modules), wrote HabitHatch domain + store +
   theme + shell. Expo **web boots with 0 console errors**; verified via Playwright: Splash →

@@ -85,6 +85,33 @@ export async function syncHabitReminders(habits: Habit[], settings: Settings): P
         trigger: { type: N.SchedulableTriggerInputTypes.DAILY, hour: hh, minute: mm } as any,
       });
     }
+    // Evening "still due" sweep — a daily RTC alarm (kill-survivable). Content is generic;
+    // the app recomputes the true state on launch, so correctness never depends on it firing.
+    if (settings.evening) {
+      await N.scheduleNotificationAsync({
+        content: { title: 'HabitHatch', body: 'Some habits are still due today. A minute now keeps the streak.', channelId: 'reminders' } as any,
+        trigger: { type: N.SchedulableTriggerInputTypes.DAILY, hour: 20, minute: 0 } as any,
+      });
+      // Streak-at-risk, later in the evening.
+      await N.scheduleNotificationAsync({
+        content: { title: 'Keep your streak alive', body: 'Clear today before midnight so your run stays unbroken.', channelId: 'streak' } as any,
+        trigger: { type: N.SchedulableTriggerInputTypes.DAILY, hour: 21, minute: 30 } as any,
+      });
+    }
+  } catch {
+    /* ignore */
+  }
+}
+
+// Fired at the day-rollover when the companion is getting hungry (health below 40).
+export async function notifyHunger(petName: string): Promise<void> {
+  const N = await notif();
+  if (!N || !ready) return;
+  try {
+    await N.scheduleNotificationAsync({
+      content: { title: `${petName || 'Your companion'} is getting hungry`, body: 'Keep today\'s habits to feed it back up.', channelId: 'care' } as any,
+      trigger: null,
+    });
   } catch {
     /* ignore */
   }
