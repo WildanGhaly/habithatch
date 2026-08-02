@@ -7,19 +7,7 @@ import { Icon } from './Icon';
 import { Art } from './Art';
 import { HabitProgressRing } from './Ring';
 import { Habit } from '../domain/types';
-import { WD } from '../domain/catalogs';
-
-function schedLabel(h: Habit): string {
-  if (h.sched === 'daily') return 'Every day';
-  if (h.sched === 'weekdays') {
-    const d = h.days || [];
-    const eq = (a: number[]) => a.length === d.length && a.every((x) => d.includes(x));
-    if (eq([1, 2, 3, 4, 5])) return 'Weekdays';
-    if (eq([0, 6])) return 'Weekends';
-    return d.slice().sort((a, b) => a - b).map((x) => WD[x]).join(', ');
-  }
-  return `${h.perWeek || 3}× a week`;
-}
+import { schedLabel } from '../domain/mechanics';
 
 // A habit row from the prototype `habitRow()`: category glyph, name (+ "next up" on the
 // first pending), streak flame + schedule tag + reminder, and the big tappable check control.

@@ -3,8 +3,22 @@
 // The mutating transitions (check-off, rollover, purchases) live in actions.ts.
 
 import { AppState, Habit, CategoryId, ScheduleKind } from './types';
-import { GARDEN, STAGES, STAGE_GATE, SEED_DAYS } from './catalogs';
+import { GARDEN, STAGES, STAGE_GATE, SEED_DAYS, WD } from './catalogs';
 import { today, dstrOff, daysBetween, dow, weekStart, isoWeek } from './dates';
+
+// Human schedule label for a habit's row/tag: "Every day" / "Weekdays" / "Weekends" /
+// "Mon, Wed" / "2× a week".
+export function schedLabel(h: Habit): string {
+  if (h.sched === 'daily') return 'Every day';
+  if (h.sched === 'weekdays') {
+    const d = (h.days || []).slice().sort((a, b) => a - b);
+    const eq = (a: number[]) => a.length === d.length && a.every((x, i) => x === a[i] && d.includes(x));
+    if (d.length === 5 && [1, 2, 3, 4, 5].every((x) => d.includes(x))) return 'Weekdays';
+    if (d.length === 2 && d.includes(0) && d.includes(6)) return 'Weekends';
+    return d.map((x) => WD[x]).join(', ');
+  }
+  return `${h.perWeek || 3}× a week`;
+}
 
 export interface Mood { t: string; k: 'happy' | 'content' | 'tired' | 'hungry'; bonus: number }
 

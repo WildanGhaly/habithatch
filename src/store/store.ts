@@ -65,10 +65,12 @@ interface StoreShape {
 
   setTab: (tab: TabKey) => void;
   toggleHabit: (id: number) => void;
+  checkDayComplete: () => void;
   addHabit: (h: HabitInput) => number;
   updateHabit: (id: number, patch: Partial<Habit>) => void;
   deleteHabit: (id: number) => void;
   archiveHabit: (id: number, archived: boolean) => void;
+  moveHabit: (id: number, dir: -1 | 1) => void;
   setGoal: (n: number) => void;
 
   feed: (foodId: number) => void;
@@ -274,32 +276,36 @@ export const useStore = create<StoreShape>((set, get) => {
       const h = st0.habits.find((x) => x.id === id);
       get().showToast(`+${res.total} coins for ${h ? h.name : 'your habit'}`, true);
       // The all-clear check plays a beat after the coin fly, like the prototype.
-      setTimeout(() => {
-        const ac = mutate((d) => A.maybeAllClear(d));
-        if (!ac) return;
-        const st = get().state!;
-        if (ac.hatched) {
-          get().openOverlay('nursery');
-          Notif.notifyHatchReady();
-        } else if (ac.cleared) {
-          const np = nextPlot(st);
-          const remain = 3 - st.pet.hatchProgress;
-          get().showReward({
-            title: 'Day complete',
-            sub: `Everything due today is done. Streak is now ${ac.streak} days.`,
-            glyph: { type: 'icon', name: 'trophy' },
-            coins: ac.bonus,
-            right: { v: String(ac.streak), l: 'Day streak' },
-            note:
-              st.pet.hatchState === 'hatched'
-                ? `${st.pet.name || 'Your companion'} is fed and your streak is safe.`
-                : `The egg is warmer. ${remain} more all-clear ${remain === 1 ? 'day' : 'days'} to go.`,
-            goal: np
-              ? `${st.profile.coins.toLocaleString('en-US')} of ${np.cost.toLocaleString('en-US')} coins toward ${np.name}`
-              : 'Your garden is fully grown',
-          });
-        }
-      }, 620);
+      setTimeout(() => get().checkDayComplete(), 620);
+    },
+
+    // Evaluate the day's all-clear: award the bonus, advance streak/hatch, and surface the
+    // reward popup or the Nursery. Shared by check-off and the goal sheet.
+    checkDayComplete: () => {
+      const ac = mutate((d) => A.maybeAllClear(d));
+      if (!ac) return;
+      const st = get().state!;
+      if (ac.hatched) {
+        get().openOverlay('nursery');
+        Notif.notifyHatchReady();
+      } else if (ac.cleared) {
+        const np = nextPlot(st);
+        const remain = 3 - st.pet.hatchProgress;
+        get().showReward({
+          title: 'Day complete',
+          sub: `Everything due today is done. Streak is now ${ac.streak} days.`,
+          glyph: { type: 'icon', name: 'trophy' },
+          coins: ac.bonus,
+          right: { v: String(ac.streak), l: 'Day streak' },
+          note:
+            st.pet.hatchState === 'hatched'
+              ? `${st.pet.name || 'Your companion'} is fed and your streak is safe.`
+              : `The egg is warmer. ${remain} more all-clear ${remain === 1 ? 'day' : 'days'} to go.`,
+          goal: np
+            ? `${st.profile.coins.toLocaleString('en-US')} of ${np.cost.toLocaleString('en-US')} coins toward ${np.name}`
+            : 'Your garden is fully grown',
+        });
+      }
     },
 
     addHabit: (h) => {
@@ -338,6 +344,19 @@ export const useStore = create<StoreShape>((set, get) => {
     archiveHabit: (id, archived) => {
       mutate((d) => { const h = d.habits.find((x) => x.id === id); if (h) h.archived = archived; });
       syncReminders();
+    },
+    // Reorder within the active (id-sorted) list by swapping the two habits' ids
+    // (ids drive ordering everywhere), matching the prototype moveHabit.
+    moveHabit: (id, dir) => {
+      mutate((d) => {
+        const live = d.habits.filter((h) => !h.archived).sort((a, b) => a.id - b.id);
+        const i = live.findIndex((h) => h.id === id);
+        const j = i + dir;
+        if (i < 0 || j < 0 || j >= live.length) return;
+        const tmp = live[i].id;
+        live[i].id = live[j].id;
+        live[j].id = tmp;
+      });
     },
     setGoal: (n) => mutate((d) => { d.profile.dailyGoal = n; }),
 
