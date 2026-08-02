@@ -367,7 +367,13 @@ export const useStore = create<StoreShape>((set, get) => {
       const name = get().state!.pet.name || 'Your companion';
       get().showToast(`${name} enjoyed the ${r.food!.name.toLowerCase()} (+${r.gained})`);
     },
-    equip: (clothesId) => mutate((d) => A.equip(d, clothesId)),
+    equip: (clothesId) => {
+      const s = get().state;
+      if (!s) return;
+      if (clothesId !== 0 && !s.pet.ownedClothes.includes(clothesId)) { get().showToast('Buy this outfit first'); return; }
+      mutate((d) => A.equip(d, clothesId));
+      get().showToast(get().state!.pet.clothesId === 0 ? 'Outfit removed' : 'Looking sharp');
+    },
     buyFood: (id) => {
       const r = mutate((d) => A.buyFood(d, id));
       if (!r) return;

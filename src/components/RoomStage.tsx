@@ -8,7 +8,6 @@ import { Icon } from './Icon';
 import { Art } from './Art';
 import { PetView } from './PetView';
 import { useStore } from '../store/store';
-import { spec } from '../domain/catalogs';
 import { moodOf, petStage, stageName, idlePending } from '../domain/mechanics';
 import { img } from '../assets/registry';
 
@@ -76,7 +75,7 @@ export function RoomStage({ height = 238, onPress, interactive = true }: { heigh
       {/* pet / egg */}
       <View style={styles.stage} pointerEvents="none">
         <View style={[styles.shadow]} />
-        {hatched ? <PetBody species={pet.species} clothesId={pet.clothesId} height={petH} moodK={mood.k} /> : <Egg progress={pet.hatchProgress} height={Math.round(height * 0.71)} />}
+        {hatched ? <PetBody species={pet.species} clothesId={pet.clothesId} height={petH} speed={mood.spd} /> : <Egg progress={pet.hatchProgress} height={Math.round(height * 0.71)} />}
       </View>
 
       {/* idle coin pile */}
@@ -129,12 +128,11 @@ function Egg({ progress, height }: { progress: number; height: number }) {
 }
 
 // The pet body: fox/penguin/axolotl via PetView (reanimated engine); dog/cat via PetView too
-// (Lottie). PetView picks the renderer; a breathing wrapper approximates the proto .breathe.
-function PetBody({ species, clothesId, height, moodK }: { species: string; clothesId: number; height: number; moodK: string }) {
-  const s = spec(species);
+// (Lottie native / PNG web). PetView picks the renderer; speed is the mood multiplier.
+function PetBody({ species, clothesId, height, speed }: { species: string; clothesId: number; height: number; speed: number }) {
   return (
     <View style={{ height, alignItems: 'center', justifyContent: 'flex-end' }}>
-      <PetView species={species as any} clothesId={clothesId} height={height} moodK={moodK} />
+      <PetView species={species} clothesId={clothesId} height={height} speed={speed} />
     </View>
   );
 }
