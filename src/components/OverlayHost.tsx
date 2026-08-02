@@ -28,6 +28,7 @@ const FULL: Partial<Record<OverlayName, React.ComponentType<{ param?: any }>>> =
   recap: RecapScreen,
   profile: ProfileScreen,
   nursery: NurseryScreen,
+  appearance: AppearanceScreen,
 };
 
 const SHEET: Partial<Record<OverlayName, React.ComponentType<{ param?: any; visible?: boolean }>>> = {
@@ -35,7 +36,6 @@ const SHEET: Partial<Record<OverlayName, React.ComponentType<{ param?: any; visi
   goal: GoalSheet,
   feed: FeedSheet,
   buy: BuySheet,
-  appearance: AppearanceScreen,
 };
 
 const H = Dimensions.get('window').height;
