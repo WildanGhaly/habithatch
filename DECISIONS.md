@@ -69,6 +69,15 @@ shipped, and what was parked. Newest entries at the bottom of each section.
   Metro/app imports stay extensionless; only the test build uses CJS resolution. `@types/node`
   already in node_modules.
 
+- **D9 — Reanimated pet engine vs prototype fox art.** The BUILD-PROMPT mandates porting
+  `PetSprite.tsx` as-is (UI-thread `matrix` worklets) and the DoD requires the reanimated pet.
+  PetSprite draws its own fox/penguin/axolotl geometry (rounder/cuter than the prototype's static
+  `ART.fox`). The prototype is a static HTML stand-in and cannot show a reanimated pet, so the
+  *live room pet* is the engine (per explicit instruction); the tiny header avatar keeps the
+  static `ART.<species>`. Copied `PetSprite.tsx` byte-for-byte (only React/reanimated/svg deps);
+  `PetView` = PetSprite for sprite species + Lottie (native) / PNG (web) for dog/cat; `moodOf`
+  gained `spd` tiers (1.25/1/0.7/0.6) feeding the engine speed.
+
 ## Milestones shipped (cont.)
 - **M2 — Scaffold boots + Today screen 1:1.** Forked Pawductivity infra (config, nav shell,
   components, PetSprite→PetView, tokens, assets, node_modules), wrote HabitHatch domain + store +

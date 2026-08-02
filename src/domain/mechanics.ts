@@ -20,7 +20,7 @@ export function schedLabel(h: Habit): string {
   return `${h.perWeek || 3}× a week`;
 }
 
-export interface Mood { t: string; k: 'happy' | 'content' | 'tired' | 'hungry'; bonus: number }
+export interface Mood { t: string; k: 'happy' | 'content' | 'tired' | 'hungry'; bonus: number; spd: number }
 
 let habitSeq = 0; // only used by newHabit when no id is supplied (UI passes an id)
 
@@ -125,10 +125,11 @@ export function gardenPct(st: AppState): number {
 
 // ---- pet ----
 export function moodOf(h: number): Mood {
-  if (h >= 75) return { t: 'Happy', k: 'happy', bonus: 0.25 };
-  if (h >= 45) return { t: 'Content', k: 'content', bonus: 0.1 };
-  if (h >= 20) return { t: 'Tired', k: 'tired', bonus: 0 };
-  return { t: 'Hungry', k: 'hungry', bonus: 0 };
+  // spd feeds the pet engine's idle speed (PetSprite clock / Lottie playback).
+  if (h >= 75) return { t: 'Happy', k: 'happy', bonus: 0.25, spd: 1.25 };
+  if (h >= 45) return { t: 'Content', k: 'content', bonus: 0.1, spd: 1 };
+  if (h >= 20) return { t: 'Tired', k: 'tired', bonus: 0, spd: 0.7 };
+  return { t: 'Hungry', k: 'hungry', bonus: 0, spd: 0.6 };
 }
 export function bonusPct(st: AppState): number {
   return Math.round(moodOf(st.pet.health).bonus * 100);
