@@ -11,13 +11,18 @@ import { colors } from './src/theme/tokens';
 import { ThemeProvider } from './src/theme/ThemeContext';
 import { useStore } from './src/store/store';
 import { initNotifications } from './src/notifications/notifications';
+import { syncPremiumFromStore } from './src/billing/restore';
 
 export default function App() {
   const [loaded] = useFonts(fonts);
 
   useEffect(() => {
-    useStore.getState().hydrate();
-    initNotifications();
+    (async () => {
+      await useStore.getState().hydrate();
+      initNotifications();
+      // Refresh HabitHatch+ entitlement from the account's real Play subscription state.
+      syncPremiumFromStore((on) => useStore.getState().setPremium(on));
+    })();
   }, []);
 
   if (!loaded) {

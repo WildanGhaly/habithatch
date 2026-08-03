@@ -7,12 +7,12 @@ import { radius } from '../theme/tokens';
 import { Txt, Btn, Card } from '../components/ui';
 import { Icon, IconName } from '../components/Icon';
 import { useStore } from '../store/store';
+import { useBilling } from '../billing/useBilling';
+import { PLANS, PlanId } from '../billing/config';
 
-// HabitHatch+ premium overlay. Ported from prototype renderPremium (proto-premium-referral.md
-// Part A). Billing is stubbed: the primary CTA is a dev unlock that flips setPremium(true).
-// The `.pbg` teal hero is hardcoded and does NOT retheme (spec NOTE 7); everything else uses c.*.
-
-type PlanId = '1 month' | '1 year' | '6 months';
+// HabitHatch+ premium overlay. Wired to Google Play Billing (expo-iap) via useBilling(): the CTA
+// starts a real subscription purchase and prices come live from Play; entitlement is granted on a
+// confirmed purchase and refreshed on launch. The teal hero is hardcoded and does NOT retheme.
 
 const FEATS: { icon: IconName; title: string; desc: string }[] = [
   { icon: 'sparkle', title: 'Five app themes', desc: 'Dusk, Forest, Ocean and Ember. Pick one the minute you sign up' },
@@ -34,27 +34,15 @@ const TABLE: { label: string; free: string | boolean; plus: string | boolean }[]
   { label: 'Recap export', free: false, plus: true },
 ];
 
-const PLANS: { id: PlanId; dur: string; sub: string; price: string; per: string; badge?: boolean }[] = [
-  { id: '1 month', dur: '1 Month', sub: 'Try it out', price: 'Rp 15.000', per: '/month' },
-  { id: '1 year', dur: '1 Year', sub: 'Rp 9.900 / month', price: 'Rp 119.000', per: '/year', badge: true },
-  { id: '6 months', dur: '6 Months', sub: 'Rp 11.500 / month', price: 'Rp 69.000', per: '/6 mo' },
-];
-
 export function PremiumScreen(_props: { param?: any }) {
   const c = useC();
   const st = useStore((s) => s.state!);
-  const setPremium = useStore((s) => s.setPremium);
-  const showToast = useStore((s) => s.showToast);
   const premium = st.profile.premium;
-  const [chosen, setChosen] = useState<PlanId>('1 year');
+  const billing = useBilling();
+  const [chosen, setChosen] = useState<PlanId>('yearly');
 
-  const buy = () => {
-    if (premium) { showToast('Manage it in Play Store subscriptions'); return; }
-    setPremium(true);
-    showToast('HabitHatch+ is on. Pick a theme and adopt any companion.');
-  };
-  const restore = () => showToast(premium ? 'Subscription already active' : 'No previous purchase found on this account');
-  const cancel = () => { setPremium(false); showToast('HabitHatch+ turned off for this demo'); };
+  const buy = () => { if (premium) billing.manage(); else billing.buy(chosen); };
+  const restore = () => billing.restore();
 
   return (
     <OverlayScreen title="HabitHatch+">
@@ -146,23 +134,18 @@ export function PremiumScreen(_props: { param?: any }) {
               <Txt weight={600} size={11.5} color={c.muted} style={{ marginTop: 1 }}>{p.sub}</Txt>
             </View>
             <View style={{ alignItems: 'flex-end' }}>
-              <Txt weight={800} size={15} color={c.tealInk}>{p.price}</Txt>
+              <Txt weight={800} size={15} color={c.tealInk}>{billing.priceFor(p.id) || p.fallbackPrice}</Txt>
               <Txt weight={600} size={11} color={c.muted}>{p.per}</Txt>
             </View>
           </Pressable>
         );
       })}
 
-      <Btn title={premium ? 'Manage subscription' : 'Continue with Google Play'} onPress={buy} block style={{ marginTop: 8 }} />
+      <Btn title={premium ? 'Manage subscription' : billing.busy ? 'Processing…' : 'Subscribe with Google Play'} onPress={buy} block style={{ marginTop: 8 }} />
       <Btn title="Restore purchases" variant="ghost" onPress={restore} block style={{ marginTop: 10 }} />
-      {premium && (
-        <Pressable onPress={cancel} style={{ marginTop: 10, alignItems: 'center', justifyContent: 'center', paddingVertical: 12 }}>
-          <Txt weight={600} size={14} color={c.muted}>Turn off for this demo</Txt>
-        </Pressable>
-      )}
 
       <Txt weight={600} size={11.5} color={c.muted} style={{ textAlign: 'center', lineHeight: 18, paddingHorizontal: 16, paddingTop: 10 }}>
-        Billed through Google Play and linked to your account, so it restores on any device. Cancel any time. Prices are illustrative for this prototype.
+        Billed through Google Play and linked to your account, so it restores on any device. Cancel anytime from Play Store subscriptions.
       </Txt>
     </OverlayScreen>
   );
