@@ -15,7 +15,7 @@ import {
   idleRate, bonusPct, allClearBonus, coinsForCheck, perks, isDue, schedLabel,
 } from '../domain/mechanics';
 import { today, dstrOff, weekStart, dow, prettyDate, daysBetween } from '../domain/dates';
-import { GARDEN, ACHIEVEMENTS, SPECIES, STAGES, STAGE_GATE, WD1, spec } from '../domain/catalogs';
+import { GARDEN, ACHIEVEMENTS, SPECIES, STAGES, STAGE_GATE, WD, WD1, spec } from '../domain/catalogs';
 import { AppState, Habit } from '../domain/types';
 
 const money = (n: number) => Math.round(n).toLocaleString('en-US');
@@ -287,6 +287,20 @@ function weekBuckets(st: AppState, n: number) {
   return weeks;
 }
 
+// Completion rate bucketed by day-of-week over the last `span` days (0 = all tracked days).
+// Mirrors the prototype's byWeekday(); days with no scheduled habits return pct=null.
+function byWeekday(st: AppState, span: number) {
+  const buckets = Array.from({ length: 7 }, () => ({ due: 0, done: 0 }));
+  const n = span > 0 ? span : Math.max(1, trackedDays(st));
+  for (let i = 0; i < n; i++) {
+    const r = st.history[dstrOff(-i)];
+    if (!r) continue;
+    const w = dow(dstrOff(-i));
+    buckets[w].due += r.due || 0; buckets[w].done += r.done || 0;
+  }
+  return buckets.map((b, i) => ({ i, name: WD[i], pct: b.due ? Math.round((b.done / b.due) * 100) : null, due: b.due }));
+}
+
 // ---------- tabs ----------
 function Overview({ st, range, rangeLabel }: { st: AppState; range: number; rangeLabel: string }) {
   const c = useC();
@@ -294,6 +308,10 @@ function Overview({ st, range, rangeLabel }: { st: AppState; range: number; rang
   const prev = aggPrev(st, range);
   const score = Math.round(a.rate * 0.5 + a.acRate * 0.33 + Math.min(100, st.profile.streak * 3) * 0.17);
   const weeks = weekBuckets(st, range > 28 ? 12 : 8);
+  const last7 = agg(st, 7).rate, last28 = agg(st, 28).rate, mom = last7 - last28;
+  const wd = byWeekday(st, range > 0 ? Math.max(range, 28) : 0).filter((x): x is { i: number; name: string; pct: number; due: number } => x.pct !== null);
+  const wdSorted = wd.slice().sort((x, y) => y.pct - x.pct);
+  const bestWd = wdSorted[0], worstWd = wdSorted[wdSorted.length - 1];
   const g = score >= 80 ? { l: 'Rock solid', s: 'This is what consistency looks like. Protect the streak.' }
     : score >= 55 ? { l: 'Finding a rhythm', s: 'Solid base. Lifting all-clear days is the fastest way to move this number.' }
       : score >= 30 ? { l: 'Warming up', s: 'The habit is forming. Aim for a couple more all-clear days a week.' }
@@ -327,6 +345,33 @@ function Overview({ st, range, rangeLabel }: { st: AppState; range: number; rang
         {weeks.length > 1 && (
           <Txt weight={600} size={11} color={c.muted} style={{ marginTop: 10 }}>
             Last week <Txt weight={800} size={11} color={c.tealInk}>{weeks[weeks.length - 2].pct}%</Txt>, this week <Txt weight={800} size={11} color={c.tealInk}>{weeks[weeks.length - 1].pct}%</Txt> so far.
+          </Txt>
+        )}
+      </Panel>
+      <Panel ic={mom >= 0 ? 'arrUp' : 'arrDn'} title="Momentum" sub="Your last 7 days against your last 28.">
+        <View style={styles.sgrid}>
+          <StatCard ic="clock" label="Last 7 days" value={last7} unit="%" />
+          <StatCard ic="calendar" label="Last 28 days" value={last28} unit="%" />
+        </View>
+        <View style={{ marginTop: 10 }}>
+          <Callout
+            tone={mom > 3 ? 'good' : mom < -3 ? 'warn' : 'neutral'}
+            ic={mom > 3 ? 'arrUp' : mom < -3 ? 'arrDn' : 'minus'}
+            text={mom > 3 ? `You're ${mom} points ahead of your monthly average.`
+              : mom < -3 ? `You're ${Math.abs(mom)} points below your monthly average. Nothing in the garden or your badges is at risk.`
+                : `Holding within ${Math.abs(mom)} points of your monthly average.`}
+          />
+        </View>
+      </Panel>
+      <Panel ic="calendar" title="Best and worst days" sub="Completion rate by day of the week.">
+        {wd.length ? (
+          wd.map((d) => <Hbar key={d.i} name={d.name} pct={d.pct} value={`${d.pct}%`} tone={d.pct >= 80 ? 'g' : d.pct < 50 ? 'o' : undefined} />)
+        ) : (
+          <Txt weight={600} size={12} color={c.muted} style={{ padding: 10 }}>Not enough history yet.</Txt>
+        )}
+        {bestWd && (
+          <Txt weight={600} size={11} color={c.muted} style={{ marginTop: 10 }}>
+            <Txt weight={800} size={11} color={c.tealInk}>{bestWd.name}</Txt> is your strongest day at {bestWd.pct}%. <Txt weight={800} size={11} color={c.tealInk}>{worstWd.name}</Txt> is the one to watch at {worstWd.pct}%.
           </Txt>
         )}
       </Panel>
@@ -595,10 +640,10 @@ function Legend({ color, label }: { color: string; label: string }) {
   const c = useC();
   return <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}><View style={{ width: 10, height: 10, borderRadius: 2.5, backgroundColor: color }} /><Txt weight={600} size={10.5} color={c.muted}>{label}</Txt></View>;
 }
-function Callout({ tone, ic, text }: { tone: 'good' | 'warn'; ic: IconName; text: string }) {
+function Callout({ tone, ic, text }: { tone: 'good' | 'warn' | 'neutral'; ic: IconName; text: string }) {
   const c = useC();
-  const bg = tone === 'good' ? c.tint2 : '#FFF4E7';
-  const fg = tone === 'good' ? c.good : c.orange2;
+  const bg = tone === 'good' ? c.tint2 : tone === 'warn' ? '#FFF4E7' : '#F2ECE0';
+  const fg = tone === 'good' ? c.good : tone === 'warn' ? c.orange2 : c.muted;
   return <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center', backgroundColor: bg, padding: 11, borderRadius: radius.sm }}><Icon name={ic} size={14} color={fg} /><Txt weight={600} size={11.5} color={fg} style={{ flex: 1, lineHeight: 16 }}>{text}</Txt></View>;
 }
 
