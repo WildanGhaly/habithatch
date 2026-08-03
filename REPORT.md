@@ -25,10 +25,15 @@ production-grade Expo / React Native Android app, implemented 1:1 from
 | #5 | **Habit Garden** (8 plots + scenic hero), **Shop** (3 tabs), **Buy** confirm. | web |
 | #6 | **Insights** (5 tabs, ~30 metrics incl. the 8-week heatmap), **Achievements** (12 badges); **Profile / Premium / Referral / Recap / Appearance** overlays (drafted by a parallel subagent workflow, integrated). | web |
 | #7 | **Android** native project (gradle memory tuning + release signing) + **notification** nudges (per-habit reminders, evening sweep, streak-at-risk, hatch-ready, hunger). | web + **emulator** |
+| #8 | Docs: this report, decision log, README. | — |
+| #9 | **Parity pass — room + companion.** True side-by-side (prototype served on :8090 vs app) found the room was a bare rect and the pet oversized (ignored the `.petstage` 44px border-box padding) with a different-drawn `PetSprite`. Fixed: render the verbatim `roomArt` scene (picture/plant/window/floor); render the pet as the exact `ART[species]`/PNG at `round(H*0.8)−44`. Today + Companion now match pixel-for-pixel. | web + **emulator** |
+| #10 | **Parity pass — Insights + Shop.** Consistency score → circular **gauge**; stat-card **delta chips**; daily-completion **day labels + foot**; Shop premium items → yellow **"Unlock"** button. | web |
 
 ## Definition-of-done check
-- ✅ **All ~16 screens 1:1 from the prototype**, verified against the extracted per-screen specs
-  (`build-notes/proto-*.md`) and by rendering.
+- ✅ **All ~16 screens 1:1 from the prototype** — verified by a **rigorous side-by-side** against the
+  actual running prototype (served on :8090, same 430px viewport + demo seed), screen by screen, with
+  drifts fixed in PRs #9–#10. Today + Companion (room + companion) re-verified on the signed release
+  APK on the emulator.
 - ✅ **Full offline SQLite persistence**; the gamified loop works end-to-end with a correct,
   replay-safe daily rollover (streaks, Streak-Freeze, per-day decay + restore, weekly freeze
   refill, egg-hatch gate) — the #1 build risk, covered by unit tests across multi-day gaps.
@@ -66,9 +71,10 @@ production-grade Expo / React Native Android app, implemented 1:1 from
   Faithful and on-brand; a touch lighter than the prototype's fuller carousel flow. *Next step:*
   add the horizontal species carousel + per-category starter-name presets if 1:1 with the
   prototype onboarding is required.
-- **Insights charts + Garden hero** are faithful, data-driven *approximations* of the prototype's
-  bespoke SVG charts (line/bars/heatmap/calendar are real; the donut is rendered as a stacked bar +
-  legend). *Next step:* swap in exact donut/gauge SVGs if strict pixel-parity on those panels matters.
+- **Insights** now matches the prototype on Overview (gauge, deltas, bars+labels+foot, heatmap,
+  calendar). The premium-locked deep-analytics panels (donut coin-flow/spend) render as a stacked
+  bar + legend rather than an exact donut — a minor deviation behind the HabitHatch+ lock.
+  *Next step:* swap in exact donut SVGs if strict parity on those locked panels matters.
 - **Release keystore** is local-only (gitignored per repo policy). *Next step:* to build release on
   another machine, generate `android/app/habithatch-release.keystore` (alias `habithatch`).
 - **Dog/cat Lottie on-device** not exercised in the smoke test (fresh installs start eggbound; the
