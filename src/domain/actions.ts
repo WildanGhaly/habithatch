@@ -273,13 +273,14 @@ export function buyPet(st: AppState, id: string): BuyResult & { name?: string; e
   const sp = SPECIES.find((x) => x.id === id);
   if (!sp) return { ok: false, reason: 'invalid' };
   const owned = st.pet.ownedSpecies.includes(sp.id);
-  if (owned) { st.pet.species = sp.id; st.pet.clothesId = 0; return { ok: true, name: sp.name, equipped: true }; }
+  // Switching to an owned species keeps every stat, including the worn outfit — the prototype's
+  // switchSpecies carries the wardrobe straight over (no clothesId reset).
+  if (owned) { st.pet.species = sp.id; return { ok: true, name: sp.name, equipped: true }; }
   if (sp.premium && !st.profile.premium) return { ok: false, reason: 'premium' };
   if (st.profile.coins < sp.price) return { ok: false, reason: 'poor' };
   spendCoins(st, sp.price, 'species');
   st.pet.ownedSpecies.push(sp.id);
   st.pet.species = sp.id;
-  st.pet.clothesId = 0;
   return { ok: true, name: sp.name };
 }
 

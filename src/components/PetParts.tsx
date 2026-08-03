@@ -1,8 +1,18 @@
 import React, { useEffect, useRef } from 'react';
 import { Animated, Easing, Image, View } from 'react-native';
-import { SpeciesDef } from '../domain/catalogs';
+import { SpeciesDef, spec } from '../domain/catalogs';
 import { clothesImg, speciesThumb } from '../assets/registry';
 import { Art } from './Art';
+
+// Small header/profile headshot: egg before hatch, the SVG art for fox/penguin/axolotl, and the
+// PNG thumbnail for dog/cat — mirrors the prototype's avatarArt() (dog/cat show their glyph, not
+// an egg). No breathe idle, no outfit; just the face.
+export function PetHeadshot({ species, hatched, size = 54, eggSize }: { species: string; hatched: boolean; size?: number; eggSize?: number }) {
+  if (!hatched) return <Art name="eggWhole" height={eggSize ?? size} />;
+  const sp = spec(species);
+  if (sp.kind === 'svg') return <Art name={sp.art!} height={size} />;
+  return <Image source={speciesThumb[species]} style={{ height: size, width: size, resizeMode: 'contain' }} />;
+}
 
 // The prototype's .breathe idle (translateY + subtle non-uniform scale), mood-driven duration.
 const BREATHE: Record<string, number> = { happy: 2600, content: 3400, tired: 4400, hungry: 5000 };
