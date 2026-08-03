@@ -47,3 +47,5 @@ release/
 expo-web.log
 emu-*.png
 build-release.log
+capshots/
+shot-*.png
