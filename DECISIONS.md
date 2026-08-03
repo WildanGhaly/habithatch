@@ -78,6 +78,20 @@ shipped, and what was parked. Newest entries at the bottom of each section.
   `PetView` = PetSprite for sprite species + Lottie (native) / PNG (web) for dog/cat; `moodOf`
   gained `spd` tiers (1.25/1/0.7/0.6) feeding the engine speed.
 
+- **D11 — Parity pass: room + pet corrected to match the prototype exactly (supersedes D9).**
+  A true side-by-side (prototype served on :8090 vs app on :8081, same 430px viewport, same demo
+  seed) exposed two real drifts on the room screens: (1) the room was a bare green rect — the
+  prototype's `roomArt()` (framed picture, potted plant, window, floor woodgrain, dirt shadows)
+  was flattened away; (2) the reanimated **PetSprite** fox is drawn differently from the
+  prototype's `ART.fox`, and I rendered the pet at the full `round(H*0.8)` height, ignoring the
+  prototype's `.petstage` `padding-bottom:44px` (border-box) — so the fox was oversized and its
+  face collided with the idle-coin badge. Fix: render the verbatim `roomArt` SVG; render the pet
+  as the exact `ART[species]` (svg) / PNG (dog-cat) with the prototype breathe + outfit overlay
+  (PetView no longer uses PetSprite/Lottie for the visible pet); pet height = `round(H*0.8) − 44`,
+  `padding-bottom` 44 (pet) / 38 (egg), shadow `bottom:48`. Per the BUILD-PROMPT's "prototype wins
+  on look", the visible companion now matches the SOT pixel-for-pixel; `PetSprite.tsx` stays ported
+  and available. Re-verified Today + Companion 1:1; Habits/Garden/Shop/Insights already matched.
+
 ## Milestones shipped (cont.)
 - **M3 — Habits tab + Editor + Goal (PR2).** Full habit management: list w/ weekly dots + reorder,
   the icon/schedule/reminder editor + 7-habit free cap, daily-goal sheet. Web-verified.
