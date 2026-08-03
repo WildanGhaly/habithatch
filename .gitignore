@@ -45,3 +45,5 @@ release/
 # verification artifacts
 .playwright-mcp/
 expo-web.log
+emu-*.png
+build-release.log

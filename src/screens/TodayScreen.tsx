@@ -8,6 +8,7 @@ import { Icon } from '../components/Icon';
 import { Art } from '../components/Art';
 import { DayRing } from '../components/Ring';
 import { RoomStage } from '../components/RoomStage';
+import { PetHeadshot } from '../components/PetParts';
 import { HabitRow } from '../components/HabitRow';
 import { useStore } from '../store/store';
 import {
@@ -77,7 +78,7 @@ export function TodayScreen() {
         <View style={[styles.topbar, { paddingTop: Math.max(20, insets.top + 12) }]}>
           <Pressable onPress={() => openOverlay('profile')} style={styles.avwrap}>
             <View style={styles.avin}>
-              {hatched ? <Art name={st.pet.species === 'dog' || st.pet.species === 'cat' ? 'eggWhole' : st.pet.species} height={54} /> : <Art name="eggWhole" height={50} />}
+              <PetHeadshot species={st.pet.species} hatched={hatched} size={54} eggSize={50} />
             </View>
           </Pressable>
           <View style={{ flex: 1 }}>

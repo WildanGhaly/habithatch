@@ -7,6 +7,7 @@ import { Txt, Card, CoinPill, Bounded, Btn } from '../components/ui';
 import { Icon } from '../components/Icon';
 import { Art } from '../components/Art';
 import { RoomStage } from '../components/RoomStage';
+import { PetHeadshot } from '../components/PetParts';
 import { useStore } from '../store/store';
 import {
   moodOf, bonusPct, petStage, stageName, decayPerDay, idleRate, idleCap, idlePending, idleFull, planted,
@@ -32,7 +33,7 @@ export function PetScreen() {
       <Bounded>
         <View style={[styles.topbar, { paddingTop: Math.max(20, insets.top + 12) }]}>
           <Pressable onPress={() => openOverlay('profile')} style={styles.avwrap}>
-            <View style={styles.avin}><Art name={hatched && st.pet.species !== 'dog' && st.pet.species !== 'cat' ? st.pet.species : 'eggWhole'} height={hatched ? 54 : 50} /></View>
+            <View style={styles.avin}><PetHeadshot species={st.pet.species} hatched={hatched} size={54} eggSize={50} /></View>
           </Pressable>
           <View style={{ flex: 1 }}>
             <Txt weight={600} size={12} color={c.muted}>{hatched ? 'Your companion' : 'The nursery'}</Txt>

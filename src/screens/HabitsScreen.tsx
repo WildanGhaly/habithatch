@@ -6,6 +6,7 @@ import { NAV_H, radius, shadowSm } from '../theme/tokens';
 import { Txt, CoinPill, Bounded } from '../components/ui';
 import { Icon } from '../components/Icon';
 import { Art } from '../components/Art';
+import { PetHeadshot } from '../components/PetParts';
 import { useStore } from '../store/store';
 import { isDue, schedLabel } from '../domain/mechanics';
 import { today, weekStart, dstrOff } from '../domain/dates';
@@ -29,7 +30,7 @@ export function HabitsScreen() {
         <View style={[styles.topbar, { paddingTop: Math.max(20, insets.top + 12) }]}>
           <Pressable onPress={() => openOverlay('profile')} style={styles.avwrap}>
             <View style={styles.avin}>
-              <Art name={st.pet.hatchState === 'hatched' && st.pet.species !== 'dog' && st.pet.species !== 'cat' ? st.pet.species : 'eggWhole'} height={st.pet.hatchState === 'hatched' ? 54 : 50} />
+              <PetHeadshot species={st.pet.species} hatched={st.pet.hatchState === 'hatched'} size={54} eggSize={50} />
             </View>
           </Pressable>
           <View style={{ flex: 1 }}>
