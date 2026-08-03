@@ -95,7 +95,7 @@ export function TodayScreen() {
         <View style={{ paddingHorizontal: 16, paddingTop: 6 }}>
           {/* room */}
           <View style={{ borderRadius: 22, overflow: 'hidden', ...shadowCard(c) }}>
-            <RoomStage height={238} onPress={() => setTab('pet')} />
+            <RoomStage height={258} onPress={() => setTab('pet')} />
           </View>
 
           {/* care card / egg banner (overlaps room by -26) */}

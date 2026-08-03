@@ -36,9 +36,11 @@ export function RoomStage({ height = 238, onPress, interactive = true }: { heigh
   const stageN = petStage(useStore.getState().state!);
   const pending = idlePending(useStore.getState().state!);
 
-  // Match the prototype: petstage height = round(H*0.8); its 44px bottom padding (border-box)
-  // eats into the art, so the pet is (round(H*0.8) - 44) tall and sits 44px above the floor.
-  const petH = Math.round(height * 0.8) - 44;
+  // The pet's rendered height. Grows upward from a fixed 44px floor offset (feet stay on the
+  // dirt shadow); a taller, centred head clears the corner mood/stage tags. Deliberately larger
+  // than the web prototype so the companion reads big on a phone (per product direction) instead
+  // of small-and-distant, while keeping ~15px of headroom below the ceiling in both room sizes.
+  const petH = Math.round(height * 0.9) - 32;
 
   const inner = (
     <View style={[styles.room, { height, backgroundColor: c.roomBg }]}>
@@ -78,7 +80,7 @@ export function RoomStage({ height = 238, onPress, interactive = true }: { heigh
       {/* pet / egg */}
       <View style={[styles.stage, { paddingBottom: hatched ? 44 : 38 }]} pointerEvents="none">
         <View style={styles.shadow} />
-        {hatched ? <PetBody species={pet.species} clothesId={pet.clothesId} height={petH} moodK={mood.k} /> : <Egg progress={pet.hatchProgress} height={168} />}
+        {hatched ? <PetBody species={pet.species} clothesId={pet.clothesId} height={petH} moodK={mood.k} /> : <Egg progress={pet.hatchProgress} height={188} />}
       </View>
 
       {/* idle coin pile */}
@@ -147,5 +149,7 @@ const styles = StyleSheet.create({
   moodtag: { position: 'absolute', top: 12, left: 12, zIndex: 5, backgroundColor: 'rgba(255,255,255,.92)', paddingVertical: 6, paddingHorizontal: 12, borderRadius: radius.pill, flexDirection: 'row', gap: 6, alignItems: 'center' },
   mooddot: { width: 8, height: 8, borderRadius: 4 },
   stagetag: { position: 'absolute', top: 12, right: 12, zIndex: 5, backgroundColor: 'rgba(12,76,96,.9)', paddingVertical: 5, paddingHorizontal: 11, borderRadius: radius.pill, flexDirection: 'row', gap: 5, alignItems: 'center' },
-  pilebadge: { position: 'absolute', top: 52, alignSelf: 'center', flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: 'rgba(12,76,96,.92)', paddingVertical: 5, paddingHorizontal: 11, borderRadius: radius.pill },
+  // Sits in the top HUD row (between the mood + stage tags) so it never overlaps the now-larger
+  // pet. The corner tags leave a centred gap wide enough for the "N to collect" pill.
+  pilebadge: { position: 'absolute', top: 13, alignSelf: 'center', flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: 'rgba(12,76,96,.92)', paddingVertical: 5, paddingHorizontal: 11, borderRadius: radius.pill, zIndex: 5 },
 });
