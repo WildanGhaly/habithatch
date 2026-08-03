@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { View, ScrollView, Pressable, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Svg, { Polyline, Circle } from 'react-native-svg';
+import Svg, { Circle, Path, Defs, LinearGradient as SvgGrad, Stop } from 'react-native-svg';
+import { LinearGradient } from 'expo-linear-gradient';
 import { OverlayScreen } from '../components/OverlayScreen';
 import { useC } from '../theme/ThemeContext';
 import { NAV_H, radius, shadowSm } from '../theme/tokens';
@@ -174,42 +175,96 @@ function RecGrid({ items }: { items: { k: string; v: string; d: string }[] }) {
     </View>
   );
 }
+// Daily-completion bars — a 1:1 port of the prototype's barsChart(): one bar per day across the
+// selected range (7 / 28 / 84 / all tracked days), each height normalised to the best day in the
+// window. A baseline rule sits under the bars; missed days show a 4px pink stub and no-due days a
+// 4px cream stub. Labels are pinned below the baseline, every ~n/7 bars, today in orange.
+const BAR_H = 96;   // pixel height of the bar area (prototype .wkbars minus its label padding)
 function WeekBars({ st, range }: { st: AppState; range: number }) {
   const c = useC();
-  const n = range === 7 ? 7 : range === 0 ? 28 : Math.min(range, 28);
   const t = today();
+  const n = range > 0 ? range : Math.max(1, trackedDays(st));
   const rows = Array.from({ length: n }, (_, i) => {
     const k = dstrOff(-(n - 1 - i));
     const r = st.history[k] || { due: 0, done: 0, ac: 0 };
-    const pct = r.due ? Math.round((r.done / r.due) * 100) : 0;
-    return { pct, ac: !!r.ac, miss: r.due > 0 && pct === 0, k };
+    const v = r.due ? Math.round((r.done / r.due) * 100) : 0;
+    return { v, ac: !!r.ac, due: r.due || 0, k, now: k === t };
   });
+  const max = Math.max(1, ...rows.map((r) => r.v));
+  const step = Math.max(1, Math.ceil(n / 7));
+  const gap = n > 24 ? 3 : n > 12 ? 4 : 6;
   const parseDay = (k: string) => parseInt(k.slice(-2), 10);
   return (
-    <View>
-      <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 2, height: 100 }}>
-        {rows.map((r, i) => (
-          <View key={i} style={{ flex: 1, height: `${Math.max(6, r.pct)}%`, backgroundColor: r.miss ? '#F0C7BC' : r.ac ? '#8FB94E' : c.teal, borderRadius: 3, borderBottomLeftRadius: 0, borderBottomRightRadius: 0 }} />
-        ))}
+    <View style={{ marginTop: 14 }}>
+      <View style={{ height: BAR_H, flexDirection: 'row', alignItems: 'flex-end', gap, position: 'relative' }}>
+        {/* baseline rule */}
+        <View style={{ position: 'absolute', left: 0, right: 0, bottom: -1, height: 1.5, backgroundColor: c.line2, borderRadius: 2 }} pointerEvents="none" />
+        {rows.map((r, i) => {
+          const off = r.due === 0;
+          const miss = !off && r.v === 0;
+          const h = off || miss ? 4 : Math.max(9, Math.round((r.v / max) * BAR_H));
+          return (
+            <View key={i} style={{ flex: 1, alignItems: 'center', justifyContent: 'flex-end', height: '100%' }}>
+              {off || miss ? (
+                <View style={{ width: '100%', maxWidth: 26, height: 4, borderRadius: 2, backgroundColor: off ? '#EFE7D6' : '#F0C7BC' }} />
+              ) : (
+                <LinearGradient
+                  colors={r.ac ? ['#B7D25E', '#8FB94E'] : [c.teal2, c.teal]}
+                  start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }}
+                  style={{ width: '100%', maxWidth: 26, height: h, borderTopLeftRadius: 5, borderTopRightRadius: 5 }}
+                />
+              )}
+            </View>
+          );
+        })}
       </View>
-      <View style={{ flexDirection: 'row', gap: 2, marginTop: 4 }}>
+      {/* labels under the baseline — fixed width + centered so 2-digit days never wrap */}
+      <View style={{ flexDirection: 'row', gap, marginTop: 7 }}>
         {rows.map((r, i) => (
           <View key={i} style={{ flex: 1, alignItems: 'center' }}>
-            {(i % 4 === 0 || i === rows.length - 1) && <Txt weight={700} size={9} color={i === rows.length - 1 ? c.orange : '#BFB7A5'}>{parseDay(r.k)}</Txt>}
+            {(i % step === 0 || r.now) && <Txt weight={700} size={9.5} color={r.now ? c.orange : '#BFB7A5'} numberOfLines={1} style={{ width: 24, textAlign: 'center' }}>{parseDay(r.k)}</Txt>}
           </View>
         ))}
       </View>
     </View>
   );
 }
-function LineChart({ data, color }: { data: number[]; color: string }) {
+// Weekly-trend line — a 1:1 port of the prototype's lineChart(): a smooth (Catmull-ish cubic)
+// curve, a soft gradient area under it, and a dot on the most recent week. Zero-based y-axis.
+function LineChart({ data, color, startLabel }: { data: number[]; color: string; startLabel?: string }) {
   if (data.length < 2) return null;
-  const w = 300, h = 84, max = Math.max(1, ...data);
-  const pts = data.map((v, i) => `${(i / (data.length - 1)) * w},${h - (v / max) * (h - 8) - 4}`).join(' ');
+  const w = 340, h = 84, pad = 4;
+  const max = Math.max(1, ...data), min = 0, rng = Math.max(1, max - min);
+  const pts = data.map((v, i) => [pad + i * ((w - pad * 2) / Math.max(1, data.length - 1)), h - pad - ((v - min) / rng) * (h - pad * 2)]);
+  let d = '';
+  pts.forEach((p, i) => {
+    if (i === 0) { d += `M${p[0].toFixed(1)} ${p[1].toFixed(1)}`; return; }
+    const q = pts[i - 1], cx = (q[0] + p[0]) / 2;
+    d += ` C${cx.toFixed(1)} ${q[1].toFixed(1)} ${cx.toFixed(1)} ${p[1].toFixed(1)} ${p[0].toFixed(1)} ${p[1].toFixed(1)}`;
+  });
+  const last = pts[pts.length - 1];
+  const area = `${d} L${last[0].toFixed(1)} ${h} L${pts[0][0].toFixed(1)} ${h} Z`;
+  const gid = `lcf_${color.replace(/[^a-z0-9]/gi, '')}`;   // unique per colour so charts don't collide
   return (
-    <Svg width="100%" height={h} viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none">
-      <Polyline points={pts} fill="none" stroke={color} strokeWidth={2.5} strokeLinejoin="round" strokeLinecap="round" />
-    </Svg>
+    <View>
+      <Svg width="100%" height={h} viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none">
+        <Defs>
+          <SvgGrad id={gid} x1="0" y1="0" x2="0" y2="1">
+            <Stop offset="0" stopColor={color} stopOpacity={0.26} />
+            <Stop offset="1" stopColor={color} stopOpacity={0} />
+          </SvgGrad>
+        </Defs>
+        <Path d={area} fill={`url(#${gid})`} />
+        <Path d={d} fill="none" stroke={color} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" />
+        <Circle cx={last[0]} cy={last[1]} r={3.6} fill={color} />
+      </Svg>
+      {startLabel && (
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 5 }}>
+          <Txt weight={700} size={9.5} color="#BFB7A5">{startLabel}</Txt>
+          <Txt weight={700} size={9.5} color="#BFB7A5">this week</Txt>
+        </View>
+      )}
+    </View>
   );
 }
 
@@ -238,7 +293,7 @@ function Overview({ st, range, rangeLabel }: { st: AppState; range: number; rang
   const a = agg(st, range);
   const prev = aggPrev(st, range);
   const score = Math.round(a.rate * 0.5 + a.acRate * 0.33 + Math.min(100, st.profile.streak * 3) * 0.17);
-  const weeks = weekBuckets(st, 8);
+  const weeks = weekBuckets(st, range > 28 ? 12 : 8);
   const g = score >= 80 ? { l: 'Rock solid', s: 'This is what consistency looks like. Protect the streak.' }
     : score >= 55 ? { l: 'Finding a rhythm', s: 'Solid base. Lifting all-clear days is the fastest way to move this number.' }
       : score >= 30 ? { l: 'Warming up', s: 'The habit is forming. Aim for a couple more all-clear days a week.' }
@@ -268,7 +323,12 @@ function Overview({ st, range, rangeLabel }: { st: AppState; range: number; rang
         <Txt weight={600} size={11} color={c.muted} style={{ marginTop: 10 }}>{a.done} habits kept, {a.due - a.done} missed, {a.ac} perfect days.</Txt>
       </Panel>
       <Panel ic="chart" title="Weekly trend" sub="Completion rate per week, most recent on the right.">
-        <LineChart data={weeks.map((w) => w.pct)} color={c.teal} />
+        <LineChart data={weeks.map((w) => w.pct)} color={c.teal} startLabel={prettyDate(weeks[0].start)} />
+        {weeks.length > 1 && (
+          <Txt weight={600} size={11} color={c.muted} style={{ marginTop: 10 }}>
+            Last week <Txt weight={800} size={11} color={c.tealInk}>{weeks[weeks.length - 2].pct}%</Txt>, this week <Txt weight={800} size={11} color={c.tealInk}>{weeks[weeks.length - 1].pct}%</Txt> so far.
+          </Txt>
+        )}
       </Panel>
     </>
   );
