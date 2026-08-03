@@ -103,8 +103,9 @@ export function InsightsScreen({ param }: { param?: { tab?: Tab } }) {
 }
 
 // ---------- shared primitives ----------
-function StatCard({ ic, label, value, unit, sub }: { ic: IconName; label: string; value: string | number; unit?: string; sub?: string }) {
+function StatCard({ ic, label, value, unit, sub, delta }: { ic: IconName; label: string; value: string | number; unit?: string; sub?: string; delta?: { v: number; unit?: string } }) {
   const c = useC();
+  const dv = delta ? delta.v : 0;
   return (
     <View style={[styles.scard, { backgroundColor: '#fff', borderColor: c.line, ...shadowSm(c) }]}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
@@ -115,6 +116,12 @@ function StatCard({ ic, label, value, unit, sub }: { ic: IconName; label: string
         <Txt weight={800} size={22} color={c.tealInk}>{value}</Txt>
         {unit && <Txt weight={700} size={12} color={c.muted}>{unit}</Txt>}
       </View>
+      {delta && dv !== 0 && (
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 2, alignSelf: 'flex-start', marginTop: 4, backgroundColor: dv > 0 ? c.tint2 : '#FBE6E0', paddingVertical: 2, paddingHorizontal: 7, borderRadius: radius.pill }}>
+          <Icon name={dv > 0 ? 'arrUp' : 'arrDn'} size={11} color={dv > 0 ? c.good : c.danger} />
+          <Txt weight={800} size={10.5} color={dv > 0 ? c.good : c.danger}>{Math.abs(dv)}{delta.unit || ''}</Txt>
+        </View>
+      )}
       {sub && <Txt weight={600} size={10.5} color={c.muted} style={{ marginTop: 2, lineHeight: 14 }}>{sub}</Txt>}
     </View>
   );
@@ -177,11 +184,21 @@ function WeekBars({ st, range }: { st: AppState; range: number }) {
     const pct = r.due ? Math.round((r.done / r.due) * 100) : 0;
     return { pct, ac: !!r.ac, miss: r.due > 0 && pct === 0, k };
   });
+  const parseDay = (k: string) => parseInt(k.slice(-2), 10);
   return (
-    <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 2, height: 100 }}>
-      {rows.map((r, i) => (
-        <View key={i} style={{ flex: 1, height: `${Math.max(6, r.pct)}%`, backgroundColor: r.miss ? '#F0C7BC' : r.ac ? '#8FB94E' : c.teal, borderRadius: 3, borderBottomLeftRadius: 0, borderBottomRightRadius: 0 }} />
-      ))}
+    <View>
+      <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 2, height: 100 }}>
+        {rows.map((r, i) => (
+          <View key={i} style={{ flex: 1, height: `${Math.max(6, r.pct)}%`, backgroundColor: r.miss ? '#F0C7BC' : r.ac ? '#8FB94E' : c.teal, borderRadius: 3, borderBottomLeftRadius: 0, borderBottomRightRadius: 0 }} />
+        ))}
+      </View>
+      <View style={{ flexDirection: 'row', gap: 2, marginTop: 4 }}>
+        {rows.map((r, i) => (
+          <View key={i} style={{ flex: 1, alignItems: 'center' }}>
+            {(i % 4 === 0 || i === rows.length - 1) && <Txt weight={700} size={9} color={i === rows.length - 1 ? c.orange : '#BFB7A5'}>{parseDay(r.k)}</Txt>}
+          </View>
+        ))}
+      </View>
     </View>
   );
 }
@@ -219,29 +236,73 @@ function weekBuckets(st: AppState, n: number) {
 function Overview({ st, range, rangeLabel }: { st: AppState; range: number; rangeLabel: string }) {
   const c = useC();
   const a = agg(st, range);
+  const prev = aggPrev(st, range);
   const score = Math.round(a.rate * 0.5 + a.acRate * 0.33 + Math.min(100, st.profile.streak * 3) * 0.17);
   const weeks = weekBuckets(st, 8);
+  const g = score >= 80 ? { l: 'Rock solid', s: 'This is what consistency looks like. Protect the streak.' }
+    : score >= 55 ? { l: 'Finding a rhythm', s: 'Solid base. Lifting all-clear days is the fastest way to move this number.' }
+      : score >= 30 ? { l: 'Warming up', s: 'The habit is forming. Aim for a couple more all-clear days a week.' }
+        : { l: 'Early days', s: 'Every check-off nudges this up. Small and steady wins.' };
   return (
     <>
       <View style={styles.sgrid}>
-        <StatCard ic="target" label="Kept" value={a.rate} unit="%" sub={`${a.done} of ${a.due} scheduled`} />
-        <StatCard ic="checkCircle" label="All-clear" value={a.ac} unit={` / ${a.active}`} sub={`${a.acRate}% of active days`} />
+        <StatCard ic="target" label="Kept" value={a.rate} unit="%" sub={`${a.done} of ${a.due} scheduled`} delta={range > 0 && prev.due ? { v: a.rate - prev.rate, unit: 'pt' } : undefined} />
+        <StatCard ic="checkCircle" label="All-clear" value={a.ac} unit={` / ${a.active}`} sub={`${a.acRate}% of active days`} delta={range > 0 && prev.active ? { v: a.ac - prev.ac } : undefined} />
         <StatCard ic="flame" label="Streak" value={st.profile.streak} unit="d" sub={`Best run ${st.profile.best} days`} />
         <StatCard ic="check" label="Kept all time" value={money(Object.values(st.history).reduce((s, r) => s + (r.done || 0), 0))} sub={`Across ${trackedDays(st)} tracked days`} />
       </View>
       <Panel ic="pulse" title="Consistency score" sub="Half completion rate, a third all-clear days, the rest current streak.">
-        <View style={{ alignItems: 'center' }}>
-          <Txt weight={800} size={42} color={c.tealInk}>{score}</Txt>
-          <Txt weight={700} size={12} color={c.muted}>{score >= 80 ? 'Rock solid' : score >= 55 ? 'Building well' : score >= 30 ? 'Finding rhythm' : 'Early days'}</Txt>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
+          <Gauge value={score} />
+          <View style={{ flex: 1 }}>
+            <Txt weight={800} size={15} color={c.tealInk}>{g.l}</Txt>
+            <Txt weight={600} size={11.5} color={c.muted} style={{ marginTop: 3, lineHeight: 16 }}>{g.s}</Txt>
+          </View>
+        </View>
+        <View style={{ borderTopWidth: 1, borderTopColor: c.line, marginTop: 12, paddingTop: 10 }}>
+          <Txt weight={600} size={11} color={c.muted}>Free plan tracks 4 weeks. {trackedDays(st)} days of history recorded so far.</Txt>
         </View>
       </Panel>
       <Panel ic="bars" title="Daily completion" right={<Chip label={rangeLabel} />} sub="Green bars are days you cleared everything that was due.">
         <WeekBars st={st} range={range} />
+        <Txt weight={600} size={11} color={c.muted} style={{ marginTop: 10 }}>{a.done} habits kept, {a.due - a.done} missed, {a.ac} perfect days.</Txt>
       </Panel>
       <Panel ic="chart" title="Weekly trend" sub="Completion rate per week, most recent on the right.">
         <LineChart data={weeks.map((w) => w.pct)} color={c.teal} />
       </Panel>
     </>
+  );
+}
+
+// The previous period of the same length, for delta chips.
+function aggPrev(st: AppState, range: number) {
+  if (range <= 0) return { due: 0, done: 0, ac: 0, active: 0, coins: 0, rate: 0, acRate: 0 };
+  const t = today();
+  let due = 0, done = 0, ac = 0, active = 0;
+  Object.keys(st.history).forEach((k) => {
+    const d = daysBetween(k, t);
+    if (d < range || d >= range * 2) return;
+    const r = st.history[k];
+    due += r.due || 0; done += r.done || 0;
+    if (r.due > 0) { active++; if (r.ac) ac++; }
+  });
+  return { due, done, ac, active, coins: 0, rate: due ? Math.round((done / due) * 100) : 0, acRate: active ? Math.round((ac / active) * 100) : 0 };
+}
+
+// Circular consistency gauge — a ring showing value/100 with the number centered.
+function Gauge({ value }: { value: number }) {
+  const c = useC();
+  const size = 86, r = 34, cx = size / 2, C = 2 * Math.PI * r;
+  return (
+    <View style={{ width: size, height: size }}>
+      <Svg width={size} height={size}>
+        <Circle cx={cx} cy={cx} r={r} stroke="#EFE7D6" strokeWidth={8} fill="none" />
+        <Circle cx={cx} cy={cx} r={r} stroke={c.orange} strokeWidth={8} strokeLinecap="round" fill="none" strokeDasharray={C} strokeDashoffset={C * (1 - Math.min(100, value) / 100)} transform={`rotate(-90 ${cx} ${cx})`} />
+      </Svg>
+      <View style={{ position: 'absolute', top: 0, left: 0, width: size, height: size, alignItems: 'center', justifyContent: 'center' }}>
+        <Txt weight={800} size={24} color={c.tealInk}>{value}</Txt>
+      </View>
+    </View>
   );
 }
 
