@@ -25,6 +25,7 @@ export function SplashScreen({ onDone }: { onDone: () => void }) {
   const load = useRef(new Animated.Value(0)).current;
   const quoteAnim = useRef(new Animated.Value(0)).current;
   const seedDemo = useStore((s) => s.seedDemo);
+  const seedUnlockAll = useStore((s) => s.seedUnlockAll);
   const taps = useRef(0);
 
   useEffect(() => {
@@ -46,10 +47,13 @@ export function SplashScreen({ onDone }: { onDone: () => void }) {
   const glowScale = pulse.interpolate({ inputRange: [0, 1], outputRange: [0.94, 1.06] });
   const glowOpacity = pulse.interpolate({ inputRange: [0, 1], outputRange: [0.4, 0.62] });
 
-  // Dev tap (bottom-right, invisible) loads the mid-journey demo seed, like the prototype.
+  // Dev tap (bottom-right, invisible): 3 taps load the fully-unlocked, egg-ready testing
+  // state (everything unlocked so every screen + animation is explorable); 5 taps load the
+  // faithful mid-journey demo seed.
   const onDev = () => {
     taps.current += 1;
-    if (taps.current >= 3) seedDemo();
+    if (taps.current === 3) seedUnlockAll();
+    else if (taps.current >= 5) seedDemo();
   };
 
   return (
@@ -66,7 +70,9 @@ export function SplashScreen({ onDone }: { onDone: () => void }) {
       <View style={styles.loader}>
         <Animated.View style={[styles.loaderBar, { transform: [{ translateX: barTranslate }] }]} />
       </View>
-      <Pressable onPress={onDev} style={styles.dev} accessibilityLabel="dev" />
+      {/* Dev seed: tap the splash 3x (unlock-all) or 5x (mid-journey demo). Full-screen so it
+          never falls in the system gesture zone. */}
+      <Pressable onPress={onDev} style={StyleSheet.absoluteFill} accessibilityLabel="dev" />
     </LinearGradient>
   );
 }

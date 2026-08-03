@@ -3,7 +3,7 @@
 // 8 real weeks through the same rules so the dashboard never contradicts itself.
 
 import { AppState, Habit, SpeciesId } from './types';
-import { GARDEN, SEED_DAYS } from './catalogs';
+import { GARDEN, SEED_DAYS, ACHIEVEMENTS, SPECIES, CLOTHES } from './catalogs';
 import { newHabit } from './mechanics';
 import { isDue } from './mechanics';
 import { today, dstrOff, daysBetween, isoWeek } from './dates';
@@ -39,6 +39,36 @@ export function blankState(now: Date = new Date()): AppState {
       spent: { food: 0, clothes: 0, species: 0, garden: 0 },
     },
   };
+}
+
+// DEV/TESTING seed — a fully-unlocked mid-journey state for exercising every screen and
+// animation. Built on the demo history (so Insights/heatmap have data), then: premium on,
+// every species + outfit owned, all 8 garden plots, big coins, all achievements, idle jar
+// full. Left EGG-READY (hatchProgress 3) so the Nursery hatch sequence is available on the
+// Today egg banner; hatching then reveals the fully-unlocked companion. Reached only via the
+// splash dev-tap.
+export function unlockAllState(now: Date = new Date()): AppState {
+  const s = freshState(true, now);
+  s.profile.premium = true;
+  s.profile.coins = 50000;
+  s.profile.lifetimeCoins = Math.max(s.profile.lifetimeCoins, 60000);
+  s.profile.freezes = 3;
+  s.pet.ownedSpecies = SPECIES.map((x) => x.id);
+  s.pet.ownedClothes = CLOTHES.map((x) => x.id);
+  s.pet.food = { 1: 9, 2: 9, 3: 9, 4: 9, 5: 9 };
+  s.pet.clothesId = 0;
+  s.pet.lastCollect = now.getTime() - 60 * 3600 * 1000; // idle jar full
+  s.garden = GARDEN.map((g) => g.id);
+  GARDEN.forEach((g) => { if (!s.gardenLog[g.id]) s.gardenLog[g.id] = today(now); });
+  s.achievements = ACHIEVEMENTS.map((a) => a.id);
+  ACHIEVEMENTS.forEach((a) => { if (!s.achLog[a.id]) s.achLog[a.id] = today(now); });
+  // egg-ready so the hatch animation can be watched; species revealed = fox
+  s.pet.species = 'fox';
+  s.pet.hatchState = 'egg';
+  s.pet.hatchProgress = 3;
+  s.pet.seenHatch = false;
+  s.pet.hatchedOn = null;
+  return s;
 }
 
 // xorshift PRNG for a deterministic demo history.

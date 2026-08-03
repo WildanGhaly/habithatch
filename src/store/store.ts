@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { produce } from 'immer';
 import { AppState, Habit, SpeciesId, TabKey, CategoryId, ScheduleKind } from '../domain/types';
 import { ThemeId } from '../theme/tokens';
-import { blankState, freshState, newDeviceId } from '../domain/state';
+import { blankState, freshState, unlockAllState, newDeviceId } from '../domain/state';
 import { newHabit } from '../domain/mechanics';
 import { nextPlot } from '../domain/mechanics';
 import * as A from '../domain/actions';
@@ -62,6 +62,7 @@ interface StoreShape {
   finishOnboarding: (species: SpeciesId, habits: HabitInput[]) => void;
   resetData: () => Promise<void>;
   seedDemo: () => void;
+  seedUnlockAll: () => void;
 
   setTab: (tab: TabKey) => void;
   toggleHabit: (id: number) => void;
@@ -261,6 +262,16 @@ export const useStore = create<StoreShape>((set, get) => {
     // Dev helper: load the mid-journey demo seed (used from the splash dev tap in the proto).
     seedDemo: () => {
       const s = freshState(true);
+      s.deviceId = newDeviceId();
+      set({ state: s, overlays: [], reward: null, rewardQueue: [] });
+      persistence.save(s);
+      Notif.syncHabitReminders(s.habits, s.settings);
+    },
+
+    // Dev helper: fully-unlocked, egg-ready testing state (premium, all species/outfits/plots,
+    // big coins, all badges, idle jar full) for exercising every screen + animation.
+    seedUnlockAll: () => {
+      const s = unlockAllState();
       s.deviceId = newDeviceId();
       set({ state: s, overlays: [], reward: null, rewardQueue: [] });
       persistence.save(s);
