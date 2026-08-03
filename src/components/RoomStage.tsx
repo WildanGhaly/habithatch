@@ -1,6 +1,11 @@
 import React, { useEffect, useRef } from 'react';
 import { View, Image, Pressable, Animated, Easing, StyleSheet } from 'react-native';
-import Svg, { Rect, Defs, LinearGradient as SvgGrad, Stop } from 'react-native-svg';
+import Svg, { Defs, LinearGradient as SvgGrad, Stop, Rect } from 'react-native-svg';
+import { SvgXml } from 'react-native-svg';
+
+// The decorated room scene, transcribed verbatim from the prototype roomArt() (window,
+// framed picture, potted plant, floor woodgrain, dirt shadows). Not themed — colors fixed.
+const ROOM_ART = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 132" preserveAspectRatio="xMidYMid slice"><rect width="220" height="132" fill="#A0B559"/><g opacity="0.28" fill="#8E9F4C"><circle cx="34" cy="16" r="2"/><circle cx="72" cy="9" r="1.6"/><circle cx="112" cy="20" r="1.8"/><circle cx="150" cy="12" r="1.6"/><circle cx="196" cy="22" r="2"/><circle cx="12" cy="46" r="1.6"/><circle cx="96" cy="52" r="1.6"/></g><rect y="84" width="220" height="48" fill="#DCC79A"/><rect y="82" width="220" height="3" fill="#8E9F4C"/><rect y="85" width="220" height="2.5" fill="#C9B084" opacity="0.55"/><g stroke="#C9B084" stroke-width="1.1" stroke-linecap="round" opacity="0.9"><path d="M0 94h92M104 94h116M0 106h48M60 106h160M0 118h146M158 118h62M0 129h74M86 129h134"/></g><g><circle cx="181" cy="35" r="19" fill="#F2EADA"/><circle cx="181" cy="35" r="15" fill="#BFE3F3"/><path d="M166 39a15 15 0 0 0 30 0z" fill="#A9D8ED"/><circle cx="174" cy="29" r="3.6" fill="#fff" opacity="0.75"/><circle cx="187" cy="33" r="2.4" fill="#fff" opacity="0.5"/><path d="M181 20v30M166 35h30" stroke="#F2EADA" stroke-width="2.4"/></g><g><rect x="26" y="20" width="27" height="22" rx="2.4" fill="#3A2E1D"/><rect x="29" y="23" width="21" height="16" rx="1.6" fill="#F2EADA"/><path d="M29 39l5.5-7 4 4 4.5-6 7 9z" fill="#A7C34F"/><circle cx="34" cy="28" r="2" fill="#F4B942"/></g><g><path d="M17 84V74" stroke="#7FA23C" stroke-width="2" stroke-linecap="round"/><path d="M17 78q-7-1.5-8.5-8.5 7 0 8.5 6z" fill="#A7C34F"/><path d="M17 75q7-1.5 8.5-8.5-7 0-8.5 6z" fill="#B7D25E"/><path d="M10 84h14l-1.6 9H11.6z" fill="#C9773A"/></g><ellipse cx="110" cy="116" rx="62" ry="12" fill="#D2BB8C" opacity="0.55"/><ellipse cx="110" cy="116" rx="48" ry="8.5" fill="#C9B084" opacity="0.45"/></svg>`;
 import { useC } from '../theme/ThemeContext';
 import { radius, shadowSm } from '../theme/tokens';
 import { Txt } from './ui';
@@ -31,16 +36,14 @@ export function RoomStage({ height = 238, onPress, interactive = true }: { heigh
   const stageN = petStage(useStore.getState().state!);
   const pending = idlePending(useStore.getState().state!);
 
-  const petH = Math.round(height * 0.8);
-  const floorH = Math.round(height * 0.24);
+  // Match the prototype: petstage height = round(H*0.8); its 44px bottom padding (border-box)
+  // eats into the art, so the pet is (round(H*0.8) - 44) tall and sits 44px above the floor.
+  const petH = Math.round(height * 0.8) - 44;
 
   const inner = (
     <View style={[styles.room, { height, backgroundColor: c.roomBg }]}>
-      {/* wall + floor */}
-      <Svg style={StyleSheet.absoluteFill} width="100%" height="100%" viewBox="0 0 220 132" preserveAspectRatio="xMidYMid slice">
-        <Rect x="0" y="0" width="220" height="132" fill={c.roomBg} />
-        <Rect x="0" y="96" width="220" height="36" fill={c.floor} />
-      </Svg>
+      {/* decorated room scene (window, picture, plant, floor) — verbatim from the prototype */}
+      <SvgXml xml={ROOM_ART} width="100%" height="100%" style={StyleSheet.absoluteFill} />
       {/* bottom cream fade (proto .room::after) */}
       <Svg style={[StyleSheet.absoluteFill]} width="100%" height="100%" pointerEvents="none">
         <Defs>
@@ -73,9 +76,9 @@ export function RoomStage({ height = 238, onPress, interactive = true }: { heigh
       )}
 
       {/* pet / egg */}
-      <View style={styles.stage} pointerEvents="none">
-        <View style={[styles.shadow]} />
-        {hatched ? <PetBody species={pet.species} clothesId={pet.clothesId} height={petH} speed={mood.spd} /> : <Egg progress={pet.hatchProgress} height={Math.round(height * 0.71)} />}
+      <View style={[styles.stage, { paddingBottom: hatched ? 44 : 38 }]} pointerEvents="none">
+        <View style={styles.shadow} />
+        {hatched ? <PetBody species={pet.species} clothesId={pet.clothesId} height={petH} moodK={mood.k} /> : <Egg progress={pet.hatchProgress} height={168} />}
       </View>
 
       {/* idle coin pile */}
@@ -129,18 +132,18 @@ function Egg({ progress, height }: { progress: number; height: number }) {
 
 // The pet body: fox/penguin/axolotl via PetView (reanimated engine); dog/cat via PetView too
 // (Lottie native / PNG web). PetView picks the renderer; speed is the mood multiplier.
-function PetBody({ species, clothesId, height, speed }: { species: string; clothesId: number; height: number; speed: number }) {
+function PetBody({ species, clothesId, height, moodK }: { species: string; clothesId: number; height: number; moodK: string }) {
   return (
     <View style={{ height, alignItems: 'center', justifyContent: 'flex-end' }}>
-      <PetView species={species} clothesId={clothesId} height={height} speed={speed} />
+      <PetView species={species} clothesId={clothesId} height={height} moodK={moodK} />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   room: { position: 'relative', overflow: 'hidden', width: '100%' },
-  stage: { position: 'absolute', left: 0, right: 0, bottom: 0, alignItems: 'center', justifyContent: 'flex-end', paddingBottom: 40 },
-  shadow: { position: 'absolute', bottom: 40, width: 118, height: 18, borderRadius: 9, backgroundColor: 'rgba(0,0,0,0.16)' },
+  stage: { position: 'absolute', left: 0, right: 0, bottom: 0, alignItems: 'center', justifyContent: 'flex-end' },
+  shadow: { position: 'absolute', bottom: 48, width: 118, height: 20, borderRadius: 10, backgroundColor: 'rgba(0,0,0,0.16)' },
   moodtag: { position: 'absolute', top: 12, left: 12, zIndex: 5, backgroundColor: 'rgba(255,255,255,.92)', paddingVertical: 6, paddingHorizontal: 12, borderRadius: radius.pill, flexDirection: 'row', gap: 6, alignItems: 'center' },
   mooddot: { width: 8, height: 8, borderRadius: 4 },
   stagetag: { position: 'absolute', top: 12, right: 12, zIndex: 5, backgroundColor: 'rgba(12,76,96,.9)', paddingVertical: 5, paddingHorizontal: 11, borderRadius: radius.pill, flexDirection: 'row', gap: 5, alignItems: 'center' },
