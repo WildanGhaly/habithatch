@@ -1,18 +1,15 @@
 # Privacy Policy — HabitHatch
 
-**Effective date:** August 3, 2026
-**Last updated:** August 3, 2026
+**Effective date:** August 4, 2026
+**Last updated:** August 4, 2026
 
-> **Before you publish:** replace the placeholders below and host this page at a public URL, then paste that URL into Play Console.
-> - `[DEVELOPER NAME]` — your name or company as it appears on your Play Console developer account.
-> - `[CONTACT EMAIL]` — a support email you monitor.
-> - `[PRIVACY POLICY URL]` — the URL where you host this document.
+_This policy is published at https://github.com/WildanGhaly/habithatch/blob/main/store/PRIVACY_POLICY.md — use that link as your Play Console "Privacy policy" URL._
 
 ---
 
 ## 1. Who we are
 
-HabitHatch ("**HabitHatch**", "**the app**", "**we**", "**us**") is a habit‑tracking mobile app published by `[DEVELOPER NAME]`. This Privacy Policy explains how the app handles information when you use it.
+HabitHatch ("**HabitHatch**", "**the app**", "**we**", "**us**") is a habit‑tracking mobile app published by **Wildan Ghaly**. This Privacy Policy explains how the app handles information when you use it.
 
 **In one sentence: HabitHatch is offline‑first and does not collect, transmit, or sell any of your personal data.** Everything you create stays on your device.
 
@@ -62,9 +59,9 @@ HabitHatch is designed to work fully offline. The app does not send your data ov
 
 HabitHatch is built with the Expo / React Native framework and uses on‑device libraries for storage, animation, and notifications. These libraries run locally on your device and are **not** used to collect or transmit your personal data. The app contains **no** advertising networks, no analytics providers, and no social‑media tracking.
 
-## 8. Purchases
+## 8. Purchases (HabitHatch+)
 
-If HabitHatch offers optional paid features ("HabitHatch+"), purchases are processed by **Google Play Billing**. We never receive or store your payment details; those are handled by Google under Google's own privacy policy. We do not receive any personally identifying payment information from Google.
+HabitHatch offers an optional paid subscription, **HabitHatch+**. All purchases are processed by **Google Play Billing**. We never receive or store your payment details — Google handles them under [Google's Privacy Policy](https://policies.google.com/privacy). The app only ever learns whether your subscription is currently active (an on/off entitlement) so it can unlock the paid features; it does not receive your name, card, or any personally identifying payment information.
 
 ## 9. Children's privacy
 
@@ -88,5 +85,5 @@ We may update this Privacy Policy from time to time. When we do, we will change 
 
 If you have questions about this Privacy Policy, contact us at:
 
-**`[CONTACT EMAIL]`**
-`[DEVELOPER NAME]`
+**wildanghaly1@gmail.com**
+Wildan Ghaly
