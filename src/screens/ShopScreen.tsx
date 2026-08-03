@@ -47,7 +47,7 @@ export function ShopScreen({ param }: { param?: { tab?: ShopTab } }) {
           const qty = st.pet.food[f.id] || 0;
           const locked = f.premium && !st.profile.premium;
           return (
-            <ShopCard key={f.id} artNode={<Image source={foodImg[f.id]} style={styles.art} />} name={f.name} desc={`+${f.heal} health`} qty={qty} premBadge={locked} onPress={() => openOverlay('buy', { kind: 'food', id: f.id })} buyLabel={<CoinBtn price={f.price} />} tone="buy" />
+            <ShopCard key={f.id} artNode={<Image source={foodImg[f.id]} style={styles.art} />} name={f.name} desc={`+${f.heal} health`} qty={qty} premBadge={locked} onPress={() => openOverlay('buy', { kind: 'food', id: f.id })} buyLabel={locked ? <UnlockLbl /> : <CoinBtn price={f.price} />} tone={locked ? 'prem' : 'buy'} />
           );
         })}
         {tab === 'pets' && SPECIES.map((s) => {
@@ -58,7 +58,7 @@ export function ShopScreen({ param }: { param?: { tab?: ShopTab } }) {
           if (owned) {
             return <ShopCard key={s.id} artNode={artNode} name={s.name} desc={active ? 'Your companion' : 'Adopted'} premBadge={false} onPress={() => buyPet(s.id)} buyLabel={<EquipLbl label={active ? 'Active' : 'Switch'} active={active} />} tone={active ? 'equipped' : 'equip'} />;
           }
-          return <ShopCard key={s.id} artNode={artNode} name={s.name} desc={s.meta} premBadge={locked} onPress={() => openOverlay('buy', { kind: 'pet', id: s.id })} buyLabel={s.price === 0 ? <Txt weight={800} size={13.5} color="#fff">Free</Txt> : <CoinBtn price={s.price} />} tone="buy" />;
+          return <ShopCard key={s.id} artNode={artNode} name={s.name} desc={s.meta} premBadge={locked} onPress={() => openOverlay('buy', { kind: 'pet', id: s.id })} buyLabel={locked ? <UnlockLbl /> : s.price === 0 ? <Txt weight={800} size={13.5} color="#fff">Free</Txt> : <CoinBtn price={s.price} />} tone={locked ? 'prem' : 'buy'} />;
         })}
         {tab === 'clothes' && CLOTHES.map((cl) => {
           const owned = st.pet.ownedClothes.includes(cl.id);
@@ -67,7 +67,7 @@ export function ShopScreen({ param }: { param?: { tab?: ShopTab } }) {
           if (owned) {
             return <ShopCard key={cl.id} artNode={<Image source={clothesImg[cl.id]} style={styles.art} />} name={cl.name} desc="Cosmetic" premBadge={false} onPress={() => equip(cl.id)} buyLabel={<EquipLbl label={on ? 'Wearing' : 'Wear'} active={on} />} tone={on ? 'equipped' : 'equip'} />;
           }
-          return <ShopCard key={cl.id} artNode={<Image source={clothesImg[cl.id]} style={styles.art} />} name={cl.name} desc="Cosmetic" premBadge={locked} onPress={() => openOverlay('buy', { kind: 'clothes', id: cl.id })} buyLabel={<CoinBtn price={cl.price} />} tone="buy" />;
+          return <ShopCard key={cl.id} artNode={<Image source={clothesImg[cl.id]} style={styles.art} />} name={cl.name} desc="Cosmetic" premBadge={locked} onPress={() => openOverlay('buy', { kind: 'clothes', id: cl.id })} buyLabel={locked ? <UnlockLbl /> : <CoinBtn price={cl.price} />} tone={locked ? 'prem' : 'buy'} />;
         })}
       </View>
     </OverlayScreen>
@@ -91,10 +91,18 @@ function EquipLbl({ label, active }: { label: string; active: boolean }) {
     </View>
   );
 }
+function UnlockLbl() {
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+      <Icon name="crown" size={13} color="#7A4B00" />
+      <Txt weight={800} size={13.5} color="#7A4B00">Unlock</Txt>
+    </View>
+  );
+}
 
-function ShopCard({ artNode, name, desc, qty, premBadge, onPress, buyLabel, tone }: { artNode: React.ReactNode; name: string; desc: string; qty?: number; premBadge?: boolean; onPress: () => void; buyLabel: React.ReactNode; tone: 'buy' | 'equipped' | 'equip' }) {
+function ShopCard({ artNode, name, desc, qty, premBadge, onPress, buyLabel, tone }: { artNode: React.ReactNode; name: string; desc: string; qty?: number; premBadge?: boolean; onPress: () => void; buyLabel: React.ReactNode; tone: 'buy' | 'equipped' | 'equip' | 'prem' }) {
   const c = useC();
-  const btnBg = tone === 'equipped' ? c.teal : tone === 'equip' ? '#fff' : c.orange;
+  const btnBg = tone === 'equipped' ? c.teal : tone === 'prem' ? c.yellow : tone === 'equip' ? '#fff' : c.orange;
   const btnBorder = tone === 'equip' ? 1.5 : 0;
   return (
     <View style={[styles.shopcard, { backgroundColor: '#fff', borderColor: c.line, ...shadowSm(c) }]}>
