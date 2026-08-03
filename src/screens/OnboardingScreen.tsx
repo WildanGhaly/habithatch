@@ -6,6 +6,7 @@ import { radius, shadowSm } from '../theme/tokens';
 import { Txt, Btn } from '../components/ui';
 import { Icon } from '../components/Icon';
 import { Art } from '../components/Art';
+import { PetHeadshot } from '../components/PetParts';
 import { CATS, SPECIES, catOf } from '../domain/catalogs';
 import { useStore, HabitInput } from '../store/store';
 import { CategoryId, SpeciesId } from '../domain/types';
@@ -80,7 +81,7 @@ export function OnboardingScreen({ onComplete }: { onComplete: () => void }) {
                 return (
                   <Pressable key={s.id} style={[styles.speccard, { backgroundColor: on ? c.tint : '#fff', borderColor: on ? c.orange : c.line, ...shadowSm(c) }]} onPress={() => setSpecies(s.id)}>
                     <View style={{ width: 64, height: 64, alignItems: 'center', justifyContent: 'flex-end' }}>
-                      {s.kind === 'svg' ? <Art name={s.art!} height={64} /> : <Art name="eggWhole" height={56} />}
+                      <PetHeadshot species={s.id} hatched size={64} />
                     </View>
                     <View style={{ flex: 1 }}>
                       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>

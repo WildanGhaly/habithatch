@@ -7,9 +7,10 @@ import { NAV_H, radius, shadowSm, shadowCard } from '../theme/tokens';
 import { Txt, CoinPill, Bounded, Btn } from '../components/ui';
 import { Icon } from '../components/Icon';
 import { Art } from '../components/Art';
+import { PetHeadshot } from '../components/PetParts';
 import { useStore } from '../store/store';
 import { nextPlot, gardenPct, planted } from '../domain/mechanics';
-import { GARDEN, spec } from '../domain/catalogs';
+import { GARDEN } from '../domain/catalogs';
 import { img } from '../assets/registry';
 
 const money = (n: number) => n.toLocaleString('en-US');
@@ -25,7 +26,6 @@ export function GardenScreen() {
   const nx = nextPlot(st);
   const pct = gardenPct(st);
   const hatched = st.pet.hatchState === 'hatched';
-  const sp = spec(st.pet.species);
   const name = hatched ? st.pet.name || 'your companion' : 'your companion';
   const remaining = nx ? Math.max(0, nx.cost - st.profile.coins) : 0;
 
@@ -37,7 +37,7 @@ export function GardenScreen() {
       <Bounded>
         <View style={[styles.topbar, { paddingTop: Math.max(20, insets.top + 12) }]}>
           <Pressable onPress={() => openOverlay('profile')} style={styles.avwrap}>
-            <View style={styles.avin}><Art name={hatched && sp.kind === 'svg' ? sp.art! : 'eggWhole'} height={hatched ? 54 : 50} /></View>
+            <View style={styles.avin}><PetHeadshot species={st.pet.species} hatched={hatched} size={54} eggSize={50} /></View>
           </Pressable>
           <View style={{ flex: 1 }}>
             <Txt weight={600} size={12} color={c.muted}>{grown.length} of {GARDEN.length} plots grown</Txt>
@@ -65,7 +65,7 @@ export function GardenScreen() {
         <View style={{ paddingHorizontal: 16, paddingTop: 14 }}>
           {/* jhero */}
           <View style={styles.jhero}>
-            <View style={styles.jheropet}>{hatched && sp.kind === 'svg' ? <Art name={sp.art!} height={54} /> : <Art name={st.pet.hatchProgress >= 1 ? 'eggCrack' : 'eggWhole'} height={54} />}</View>
+            <View style={styles.jheropet}>{hatched ? <PetHeadshot species={st.pet.species} hatched size={54} /> : <Art name={st.pet.hatchProgress >= 1 ? 'eggCrack' : 'eggWhole'} height={54} />}</View>
             <View style={{ flex: 1, minWidth: 0 }}>
               <Txt weight={700} size={11} color={c.orange2} style={{ textTransform: 'uppercase', letterSpacing: 0.4 }}>{nx ? 'The long game' : 'Complete'}</Txt>
               <Txt weight={800} size={16} color={c.tealInk} style={{ marginTop: 2 }}>{nx ? `Grow ${name} a real garden` : 'The garden is in full bloom'}</Txt>
