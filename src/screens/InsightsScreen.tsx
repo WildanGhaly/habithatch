@@ -301,6 +301,31 @@ function byWeekday(st: AppState, span: number) {
   return buckets.map((b, i) => ({ i, name: WD[i], pct: b.due ? Math.round((b.done / b.due) * 100) : null, due: b.due }));
 }
 
+// The habit most often left undone on days you didn't go all-clear, over the last `span` days.
+function blocker(st: AppState, span: number): { h: Habit; n: number } | null {
+  const n = span > 0 ? span : Math.max(1, trackedDays(st));
+  const miss: Record<number, number> = {};
+  for (let i = n - 1; i >= 0; i--) {
+    const k = dstrOff(-i);
+    const r = st.history[k];
+    if (!r || !r.due || r.ac) continue;
+    st.habits.forEach((h) => { if (isDue(h, k) && h.logs[k] !== 'done') miss[h.id] = (miss[h.id] || 0) + 1; });
+  }
+  const top = Object.keys(miss).sort((a, b) => miss[+b] - miss[+a])[0];
+  if (top == null) return null;
+  const h = st.habits.find((x) => String(x.id) === top);
+  return h ? { h, n: miss[+top] } : null;
+}
+
+// Average days between one streak ending and the next starting (null if fewer than 2 runs).
+function recoveryDays(st: AppState): number | null {
+  const runs = streakRuns(st).slice().sort((a, b) => (a.from < b.from ? -1 : 1));
+  if (runs.length < 2) return null;
+  const gaps: number[] = [];
+  for (let i = 1; i < runs.length; i++) gaps.push(Math.max(1, daysBetween(runs[i - 1].to, runs[i].from) - 1));
+  return gaps.length ? Math.round((gaps.reduce((a, b) => a + b, 0) / gaps.length) * 10) / 10 : null;
+}
+
 // ---------- tabs ----------
 function Overview({ st, range, rangeLabel }: { st: AppState; range: number; rangeLabel: string }) {
   const c = useC();
@@ -415,6 +440,9 @@ function Habits({ st, range, rangeLabel }: { st: AppState; range: number; rangeL
   const c = useC();
   const live = st.habits.filter((h) => !h.archived);
   const ranked = live.map((h) => ({ h, ...habitRate(st, h, range) })).sort((x, y) => y.pct - x.pct);
+  const timed = live.filter((h) => h.remind).sort((a, b) => (a.remind < b.remind ? -1 : 1));
+  const untimed = live.length - timed.length;
+  const bl = blocker(st, range);
   return (
     <>
       <Panel ic="trophy" title="Habit leaderboard" right={<Chip label={rangeLabel} />} sub="Completion rate over the selected range, best first.">
@@ -435,6 +463,38 @@ function Habits({ st, range, rangeLabel }: { st: AppState; range: number; rangeL
         <View style={{ flexDirection: 'row', gap: 12, marginTop: 10, justifyContent: 'center' }}>
           <Legend color={c.good} label="kept" /><Legend color="#F0C7BC" label="missed" /><Legend color={c.line2} label="not due" />
         </View>
+      </Panel>
+      <Panel ic="target" title="What breaks your day" sub="On days you didn't go all-clear, this is the habit most often left undone." locked={!st.profile.premium} lockTitle="Blocker analysis" lockSub="See exactly which habit costs you the most all-clear days." onUnlock={() => useStore.getState().openOverlay('premium')}>
+        {bl ? (
+          <>
+            <View style={[styles.rank, { borderBottomWidth: 0 }]}>
+              <View style={[styles.ric, { backgroundColor: c.cream, borderColor: c.line2 }]}><Art name={bl.h.cat} size={22} /></View>
+              <View style={{ flex: 1, minWidth: 0 }}>
+                <Txt weight={700} size={13} color={c.tealInk} numberOfLines={1}>{bl.h.name}</Txt>
+                <Txt weight={600} size={10.5} color={c.muted}>Missed on {bl.n} of your incomplete days</Txt>
+              </View>
+              <Txt weight={800} size={14} color={c.tealInk}>{bl.n}<Txt weight={700} size={10} color={c.muted}> times</Txt></Txt>
+            </View>
+            <View style={{ marginTop: 10 }}>
+              <Callout tone="warn" ic="info" text={`Consider moving ${bl.h.name} earlier in the day, or lowering your daily goal so one hard habit can't sink the whole day.`} />
+            </View>
+          </>
+        ) : (
+          <Callout tone="good" ic="checkCircle" text="No pattern yet. You haven't missed enough days for a blocker to show up." />
+        )}
+      </Panel>
+      <Panel ic="clock" title="Your day, by reminder" sub="Habits in the order they nudge you.">
+        {timed.map((h) => (
+          <View key={h.id} style={styles.rank}>
+            <View style={[styles.ric, { backgroundColor: c.cream, borderColor: c.line2 }]}><Art name={h.cat} size={22} /></View>
+            <View style={{ flex: 1, minWidth: 0 }}>
+              <Txt weight={700} size={13} color={c.tealInk} numberOfLines={1}>{h.name}</Txt>
+              <Txt weight={600} size={10.5} color={c.muted}>{schedLabel(h)} · {habitRate(st, h, range).pct}% kept</Txt>
+            </View>
+            <Txt weight={800} size={13} color={c.tealInk}>{h.remind}<Txt weight={700} size={9.5} color={c.muted}> reminder</Txt></Txt>
+          </View>
+        ))}
+        {untimed > 0 && <View style={{ marginTop: timed.length ? 10 : 0 }}><Callout tone="neutral" ic="bell" text={`${untimed} of your habits ${untimed === 1 ? 'has' : 'have'} no reminder set. Add one from the habit editor.`} /></View>}
       </Panel>
       <Panel ic="note" title="Your habit set">
         <RecGrid items={[
@@ -474,6 +534,7 @@ function Streaks({ st }: { st: AppState }) {
   const runs = streakRuns(st);
   const avg = runs.length ? Math.round(runs.reduce((s, r) => s + r.len, 0) / runs.length) : 0;
   const live = st.profile.streak > 0;
+  const rec = recoveryDays(st);
   return (
     <>
       <View style={styles.sgrid}>
@@ -499,6 +560,22 @@ function Streaks({ st }: { st: AppState }) {
             <Txt weight={800} size={11} color={live && i === 0 ? c.orange : c.muted}>{live && i === 0 ? 'running' : i === 0 ? 'best' : ''}</Txt>
           </View>
         )) : <Empty text="Clear a full day to start your first run." />}
+      </Panel>
+      <Panel ic="repeat" title="How fast you bounce back" sub="Average days between one streak ending and the next starting." locked={!st.profile.premium} lockTitle="Recovery pattern" lockSub="The number that predicts whether a habit sticks." onUnlock={() => useStore.getState().openOverlay('premium')}>
+        {rec !== null ? (
+          <>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
+              <View style={{ backgroundColor: c.cream, borderWidth: 1, borderColor: c.line2, borderRadius: radius.md, paddingVertical: 14, paddingHorizontal: 18, alignItems: 'center' }}>
+                <Txt weight={800} size={30} color={c.tealInk} style={{ lineHeight: 32 }}>{rec}</Txt>
+                <Txt weight={800} size={10} color={c.muted} style={{ marginTop: 3, letterSpacing: 0.3 }}>DAYS OFF</Txt>
+              </View>
+              <Txt weight={600} size={12} color={c.muted} style={{ flex: 1, lineHeight: 18 }}>{rec <= 1.5 ? 'You get straight back on it. Restarting fast matters more than never missing.' : rec <= 3 ? 'A short dip and then back. Comfortably inside the range where habits hold.' : 'It takes a few days to restart. A Streak Freeze covers the first missed day so the gap never opens at all.'}</Txt>
+            </View>
+            <View style={{ marginTop: 12 }}><Hbar name="Runs recorded" pct={Math.min(100, runs.length * 12)} value={`${runs.length}`} /></View>
+          </>
+        ) : (
+          <Empty text="Not enough runs yet. Build a couple of streaks and your recovery pace shows up here." />
+        )}
       </Panel>
       <Panel ic="snow" title="Streak Freeze" sub="The token that covers one missed day, spent automatically.">
         <RecGrid items={[
@@ -537,6 +614,7 @@ function Economy({ st }: { st: AppState }) {
   const eta = nextPlot(st);
   const srcSegs = [['Check-offs', st.stats.src.check, c.teal2], ['All-clear', st.stats.src.clear, c.orange], ['Foraging', st.stats.src.idle, c.grass], ['Invites', st.stats.src.gift, c.pink]] as const;
   const srcTotal = Math.max(1, srcSegs.reduce((s, x) => s + x[1], 0));
+  const spSegs = [['Habit Garden', st.stats.spent.garden, c.grass], ['Companions', st.stats.spent.species, c.teal2], ['Treats', st.stats.spent.food, c.orange], ['Wardrobe', st.stats.spent.clothes, c.pink]] as const;
   return (
     <>
       <View style={styles.sgrid}>
@@ -551,6 +629,18 @@ function Economy({ st }: { st: AppState }) {
           {srcSegs.map((s, i) => <View key={i} style={{ width: `${(s[1] / srcTotal) * 100}%`, backgroundColor: s[2] }} />)}
         </View>
         {srcSegs.map((s, i) => <View key={i} style={{ flexDirection: 'row', alignItems: 'center', gap: 7, marginVertical: 2 }}><View style={{ width: 10, height: 10, borderRadius: 3, backgroundColor: s[2] }} /><Txt weight={600} size={12} color={c.tealInk} style={{ flex: 1 }}>{s[0]}</Txt><Txt weight={800} size={12} color={c.muted}>{money(s[1])}</Txt></View>)}
+      </Panel>
+      <Panel ic="bag" title="Where coins go" sub="Lifetime spending by category." locked={!st.profile.premium} lockTitle="Spending breakdown" lockSub="Track every coin out the door." onUnlock={() => useStore.getState().openOverlay('premium')}>
+        {spentTotal ? (
+          <>
+            <View style={{ height: 12, borderRadius: 9, overflow: 'hidden', flexDirection: 'row', marginBottom: 10 }}>
+              {spSegs.map((s, i) => (s[1] > 0 ? <View key={i} style={{ width: `${(s[1] / spentTotal) * 100}%`, backgroundColor: s[2] }} /> : null))}
+            </View>
+            {spSegs.map((s, i) => <View key={i} style={{ flexDirection: 'row', alignItems: 'center', gap: 7, marginVertical: 2 }}><View style={{ width: 10, height: 10, borderRadius: 3, backgroundColor: s[2] }} /><Txt weight={600} size={12} color={c.tealInk} style={{ flex: 1 }}>{s[0]}</Txt><Txt weight={800} size={12} color={c.muted}>{money(s[1])}</Txt></View>)}
+          </>
+        ) : (
+          <Empty text="Nothing spent yet." />
+        )}
       </Panel>
       <Panel ic="sprout" title="Garden progress" sub="The long sink for everything you earn.">
         <View style={{ height: 8, borderRadius: 9, backgroundColor: '#EFE7D6', overflow: 'hidden' }}><View style={{ height: '100%', width: `${gardenPct(st)}%`, backgroundColor: c.grass, borderRadius: 9 }} /></View>
